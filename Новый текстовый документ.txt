@@ -1,0 +1,43 @@
+шаг 1
+	/1как отправлять сообщения от одного пользвателя к другому используюя сокет сервер
+	/2как сервер будет получать полную информацию о входящем запросе и отправлять соответсвующий ответ
+/сделанно
+	/3как хранить сокеты в базе данных.
+
+
+
+
+шаг 2
+	/1как избавиться от привязанности к ip аддресу и использовать уникальные идентификаторы
+		-както постоянно отправлять информацию о клиенте. какой у него ip на данный момент чтобы иметь актуальный адрес
+	
+--------------------------------------------------------------------------
+вот тут будет подключение начального фронэнда у клиента.
+шаг 3
+	построение функционала(профайл, хранилище сообщений в базе клиента)
+шаг 4
+	модель защиты сообщений(енкод,енкрипт, труба впн)
+
+
+
+lang			python
+
+database		postgresql
+
+ports			smtp pop3 imap 
+
+WAF/Middleware		-/custom
+NAF			-
+
+
+import socket		TCP
+import socketserver	TCP
+import _socket		TCP
+import psycopg2 	postgresql
+import sockets		TCP
+import tkinter 		GUI 
+import select		mltiple client server
+import ssl		VPN tunel
+
+
+ex:struct		https://www.google.com/search?q=messenger+structure&sxsrf=AOaemvJ2Py-sszM_N79z8-i9bPj-AAbS-w:1637139716493&tbm=isch&source=iu&ictx=1&fir=JeUapLqNWize4M%252CSUZelffIJhXHDM%252C_%253B3wcmXvI9sFi6PM%252CbnSI5uLavKa57M%252C_%253BuBVpWOe3TX96hM%252CUvzlnZbuvrKePM%252C_%253B13xdmRbFwmJfQM%252CSUZelffIJhXHDM%252C_%253BUAAKqp7MDDLJVM%252CVV9FGpDyVIvVPM%252C_%253BK9jskMJvrY2pqM%252CgW3m5Fhh4KTeTM%252C_%253BYRK4-f18CFotzM%252CzTUq9NiLb7VR_M%252C_%253BOmR0IeVWtCoeOM%252CsPxeab8LNSdluM%252C_%253BvinOjuCZnQ8MMM%252CS7j24GrYfqmoKM%252C_%253BNU1EpmhEtvWuWM%252C5thiZETEEy7SVM%252C_&vet=1&usg=AI4_-kQ_l6tPLsQO9fRE18IyVkJOpSG1JQ&sa=X&sqi=2&ved=2ahUKEwiS0_7ZhJ_0AhVICTQIHUhcDJ8Q9QF6BAgDEAE#imgrc=CpC5O8uPoWfYQM
