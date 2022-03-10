@@ -189,7 +189,7 @@ def fib_handler(client):
         try:
             client.send(resp)
         except:
-            print('clint disconnectrd')
+            print('client disconnectrd')
     print('closed')
 
 

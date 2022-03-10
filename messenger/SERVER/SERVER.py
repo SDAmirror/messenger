@@ -90,7 +90,9 @@
 import socket
 import uuid
 import json
-
+import DB.database as db
+#postgres
+#123456
 
 from socket import *
 from concurrent.futures import ProcessPoolExecutor as Pool
@@ -99,6 +101,7 @@ from collections import deque
 from select import select
 
 clients = {}
+
 tasks = deque()
 pool = Pool(10)
 recv_wait = {}
@@ -163,13 +166,75 @@ def client_handler(client):
         yield 'future',future
         result = future.result()
         # result = fib(n)
-        resp = str(result).encode('ascii')+b'\n'
+        resp = str(result).encode()
         yield 'send',client
         try:
             client.send(resp)
         except:
             print('cleint disconnected')
     print('closed')
+
+
+
+
+
+def connection_processor(message):
+
+
+    data = json.loads(message)
+
+
+    {
+        "case":"authorization,authentification,registration,recovery",
+        "authentification_check": True,
+        "authentification_token": "",
+        "authorization_check": True,
+        "authorization_data": ["username","password"],
+        "authentification_token": "",
+        "authentification_token": "",
+    }
+
+    def authentification_token_validation(token, username):
+        # table authentication session
+        # get by username
+        # if rows not null
+            #if token valid return True
+
+        pass
+
+
+    if not data['authentification_check']:
+        token = data["authentification_token"]
+        username = data["authorization_data"][0]
+        #check if token valid for this user
+        if authentification_token_validation(token,username):
+            profile = {"messages":[{},{},{}],"friends":[]}
+            return "authentication success"+json.dumps(profile)
+        else:
+            return "authentication failed"
+
+    id
+    """
+    
+    кейс 1
+        я такой клиент ,я  не зарегестрирован, я хочу новый аккаунт
+            форма регистрации
+    кейс 2
+        я зарегестрирован вот мои аторизационные данные
+            проверить аторизационные данные
+    кейс 3 
+        я авторизован вот мой аутентификатор/токен private.key .crt
+            вернуть информацию
+    кейс 4
+        я забыл пароль
+            аутентификация        
+            
+    authentification_check: 
+    authorization_check: 
+    authentification_token: token
+    authorization: [username,password]
+    """
+
 
 
 def base_server(address):
@@ -182,6 +247,8 @@ def base_server(address):
         yield 'recv',sock
         client, addr = sock.accept()
         message = client.recv(1024).decode()
+        connection_processor(message)
+        #{"username": "username","authSessionID": "id"}
 
         data = sock.recv(1024).decode('utf-8')  # this returns a JSON-formatted String
         #TODO function that starts cliebnt at connection.
@@ -192,7 +259,7 @@ def base_server(address):
         # t = Thread(target=fib_handler,args=(client,),daemon=True)
         # t.start()
         # fib_handler(client)
-        tasks.append(somestruct(client_handler(client),id))
+        tasks.append(client_handler(client))
 
 
 
