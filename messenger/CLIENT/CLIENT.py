@@ -1,9 +1,10 @@
 import socket
 import random
+import sys
 from threading import Thread
 from datetime import datetime
 from colorama import Fore, init
-
+import json
 # init colors
 init()
 
@@ -21,7 +22,7 @@ client_color = random.choice(colors)
 # if the server is not on this machine, 
 # put the private (network) IP address (e.g 192.168.1.2)
 SERVER_HOST = "localhost"
-SERVER_PORT = 5002 # server's port
+SERVER_PORT = 8888 # server's port
 separator_token = "<SEP>" # we will use this to separate the client name & message
 
 # initialize TCP socket
@@ -32,13 +33,33 @@ s.connect((SERVER_HOST, SERVER_PORT))
 print("[+] Connected.")
 
 # prompt the client for a name
-name = input("Enter your name: ")
-s.send(name.encode())
 
+s.send(json.dumps(   {
+        "case":"authorization,authentification,registration,recovery",
+        "authentification_check": False,
+        "authentification_token": "token1",
+        "authorization_check": True,
+        "authorization_data": ["user1","password1"],
+
+    }
+).encode())
+print("sent")
+m = s.recv(1024).decode()
+
+print(m,'recived')
+mess = json.loads(str(m))
+print(mess)
+if mess['auth_succses']:
+    print(mess['AuthenticationUser'])
+else:
+    print("failed")
 
 def listen_for_messages():
     while True:
         message = s.recv(1024).decode()
+        if not message:
+            print("closed")
+            break
         print("\n" + message)
 
 # make a thread that listens for messages to this client & print them
@@ -59,7 +80,7 @@ while True:
         break
     # add the datetime, name & the color of the sender
     date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    to_send = f"{client_color}[{date_now}] {name}{separator_token}{to_send}{Fore.RESET}----{username}"
+    to_send = f"{client_color}[{date_now}]{separator_token}{to_send}{Fore.RESET}----{username}"
     # finally, send the message
     s.send(to_send.encode())
 

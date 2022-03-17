@@ -3,17 +3,9 @@
   <database-model serializer="dbm" dbms="POSTGRES" family-id="POSTGRES" format-version="4.32">
     <root id="1">
       <DateStyle>dmy</DateStyle>
-      <Grants>1||-9223372036854775808|c|G
-1||10|c|G
-1||10|C|G
-1||10|T|G
-13753||-9223372036854775808|c|G
-13753||10|c|G
-13753||10|C|G
-13753||10|T|G</Grants>
-      <IntrospectionStateNumber>784</IntrospectionStateNumber>
+      <IntrospectionStateNumber>838</IntrospectionStateNumber>
       <ServerVersion>14.2</ServerVersion>
-      <StartupTime>1646914608</StartupTime>
+      <StartupTime>1647148376</StartupTime>
       <TimeZones>true ACDT
 true ACSST
 false ACST
@@ -95,8 +87,8 @@ false Africa/Timbuktu
 false Africa/Tripoli
 false Africa/Tunis
 false Africa/Windhoek
-false America/Adak
-false America/Anchorage
+true America/Adak
+true America/Anchorage
 false America/Anguilla
 false America/Antigua
 false America/Araguaina
@@ -116,7 +108,7 @@ false America/Argentina/Ushuaia
 false America/Aruba
 true America/Asuncion
 false America/Atikokan
-false America/Atka
+true America/Atka
 false America/Bahia
 false America/Bahia_Banderas
 false America/Barbados
@@ -125,16 +117,16 @@ false America/Belize
 false America/Blanc-Sablon
 false America/Boa_Vista
 false America/Bogota
-false America/Boise
+true America/Boise
 false America/Buenos_Aires
-false America/Cambridge_Bay
+true America/Cambridge_Bay
 false America/Campo_Grande
 false America/Cancun
 false America/Caracas
 false America/Catamarca
 false America/Cayenne
 false America/Cayman
-false America/Chicago
+true America/Chicago
 false America/Chihuahua
 false America/Coral_Harbour
 false America/Cordoba
@@ -145,123 +137,123 @@ false America/Curacao
 false America/Danmarkshavn
 false America/Dawson
 false America/Dawson_Creek
-false America/Denver
-false America/Detroit
+true America/Denver
+true America/Detroit
 false America/Dominica
-false America/Edmonton
+true America/Edmonton
 false America/Eirunepe
 false America/El_Salvador
-false America/Ensenada
+true America/Ensenada
 false America/Fort_Nelson
-false America/Fort_Wayne
+true America/Fort_Wayne
 false America/Fortaleza
-false America/Glace_Bay
+true America/Glace_Bay
 false America/Godthab
-false America/Goose_Bay
-false America/Grand_Turk
+true America/Goose_Bay
+true America/Grand_Turk
 false America/Grenada
 false America/Guadeloupe
 false America/Guatemala
 false America/Guayaquil
 false America/Guyana
-false America/Halifax
-false America/Havana
+true America/Halifax
+true America/Havana
 false America/Hermosillo
-false America/Indiana/Indianapolis
-false America/Indiana/Knox
-false America/Indiana/Marengo
-false America/Indiana/Petersburg
-false America/Indiana/Tell_City
-false America/Indiana/Vevay
-false America/Indiana/Vincennes
-false America/Indiana/Winamac
-false America/Indianapolis
-false America/Inuvik
-false America/Iqaluit
+true America/Indiana/Indianapolis
+true America/Indiana/Knox
+true America/Indiana/Marengo
+true America/Indiana/Petersburg
+true America/Indiana/Tell_City
+true America/Indiana/Vevay
+true America/Indiana/Vincennes
+true America/Indiana/Winamac
+true America/Indianapolis
+true America/Inuvik
+true America/Iqaluit
 false America/Jamaica
 false America/Jujuy
-false America/Juneau
-false America/Kentucky/Louisville
-false America/Kentucky/Monticello
-false America/Knox_IN
+true America/Juneau
+true America/Kentucky/Louisville
+true America/Kentucky/Monticello
+true America/Knox_IN
 false America/Kralendijk
 false America/La_Paz
 false America/Lima
-false America/Los_Angeles
-false America/Louisville
+true America/Los_Angeles
+true America/Louisville
 false America/Lower_Princes
 false America/Maceio
 false America/Managua
 false America/Manaus
 false America/Marigot
 false America/Martinique
-false America/Matamoros
+true America/Matamoros
 false America/Mazatlan
 false America/Mendoza
-false America/Menominee
+true America/Menominee
 false America/Merida
-false America/Metlakatla
+true America/Metlakatla
 false America/Mexico_City
-false America/Miquelon
-false America/Moncton
+true America/Miquelon
+true America/Moncton
 false America/Monterrey
 false America/Montevideo
-false America/Montreal
+true America/Montreal
 false America/Montserrat
-false America/Nassau
-false America/New_York
-false America/Nipigon
-false America/Nome
+true America/Nassau
+true America/New_York
+true America/Nipigon
+true America/Nome
 false America/Noronha
-false America/North_Dakota/Beulah
-false America/North_Dakota/Center
-false America/North_Dakota/New_Salem
+true America/North_Dakota/Beulah
+true America/North_Dakota/Center
+true America/North_Dakota/New_Salem
 false America/Nuuk
-false America/Ojinaga
+true America/Ojinaga
 false America/Panama
-false America/Pangnirtung
+true America/Pangnirtung
 false America/Paramaribo
 false America/Phoenix
-false America/Port-au-Prince
+true America/Port-au-Prince
 false America/Port_of_Spain
 false America/Porto_Acre
 false America/Porto_Velho
 false America/Puerto_Rico
 false America/Punta_Arenas
-false America/Rainy_River
-false America/Rankin_Inlet
+true America/Rainy_River
+true America/Rankin_Inlet
 false America/Recife
 false America/Regina
-false America/Resolute
+true America/Resolute
 false America/Rio_Branco
 false America/Rosario
-false America/Santa_Isabel
+true America/Santa_Isabel
 false America/Santarem
 true America/Santiago
 false America/Santo_Domingo
 false America/Sao_Paulo
 false America/Scoresbysund
-false America/Shiprock
-false America/Sitka
+true America/Shiprock
+true America/Sitka
 false America/St_Barthelemy
-false America/St_Johns
+true America/St_Johns
 false America/St_Kitts
 false America/St_Lucia
 false America/St_Thomas
 false America/St_Vincent
 false America/Swift_Current
 false America/Tegucigalpa
-false America/Thule
-false America/Thunder_Bay
-false America/Tijuana
-false America/Toronto
+true America/Thule
+true America/Thunder_Bay
+true America/Tijuana
+true America/Toronto
 false America/Tortola
-false America/Vancouver
+true America/Vancouver
 false America/Virgin
 false America/Whitehorse
-false America/Winnipeg
-false America/Yakutat
-false America/Yellowknife
+true America/Winnipeg
+true America/Yakutat
+true America/Yellowknife
 false Antarctica/Casey
 false Antarctica/Davis
 false Antarctica/DumontDUrville
@@ -375,7 +367,7 @@ false Asia/Yangon
 false Asia/Yekaterinburg
 false Asia/Yerevan
 false Atlantic/Azores
-false Atlantic/Bermuda
+true Atlantic/Bermuda
 false Atlantic/Canary
 false Atlantic/Cape_Verde
 false Atlantic/Faeroe
@@ -438,19 +430,19 @@ true CLST
 true CLT
 false COT
 false CST
-false CST6CDT
+true CST6CDT
 false CXT
-false Canada/Atlantic
-false Canada/Central
-false Canada/Eastern
-false Canada/Mountain
-false Canada/Newfoundland
-false Canada/Pacific
+true Canada/Atlantic
+true Canada/Central
+true Canada/Eastern
+true Canada/Mountain
+true Canada/Newfoundland
+true Canada/Pacific
 false Canada/Saskatchewan
 false Canada/Yukon
 true Chile/Continental
 true Chile/EasterIsland
-false Cuba
+true Cuba
 false DAVT
 false DDUT
 true EASST
@@ -463,7 +455,7 @@ true EETDST
 true EGST
 false EGT
 false EST
-false EST5EDT
+true EST5EDT
 false Egypt
 true Eire
 false Etc/GMT
@@ -644,12 +636,12 @@ false MPT
 true MSD
 false MSK
 false MST
-false MST7MDT
+true MST7MDT
 true MUST
 false MUT
 false MVT
 false MYT
-false Mexico/BajaNorte
+true Mexico/BajaNorte
 false Mexico/BajaSur
 false Mexico/General
 true NDT
@@ -664,7 +656,7 @@ true NZ-CHAT
 true NZDT
 false NZST
 false NZT
-false Navajo
+true Navajo
 false OMSST
 false OMST
 true PDT
@@ -681,7 +673,7 @@ false PMST
 false PONT
 false PRC
 false PST
-false PST8PDT
+true PST8PDT
 false PWT
 true PYST
 true PYT
@@ -751,17 +743,17 @@ false Turkey
 false UCT
 true ULAST
 false ULAT
-false US/Alaska
-false US/Aleutian
+true US/Alaska
+true US/Aleutian
 false US/Arizona
-false US/Central
-false US/East-Indiana
-false US/Eastern
+true US/Central
+true US/East-Indiana
+true US/Eastern
 false US/Hawaii
-false US/Indiana-Starke
-false US/Michigan
-false US/Mountain
-false US/Pacific
+true US/Indiana-Starke
+true US/Michigan
+true US/Mountain
+true US/Pacific
 false US/Samoa
 false UT
 false UTC
@@ -809,28 +801,27 @@ false Zulu
 13388||10|C|G
 13388||-9223372036854775808|U|G
 13388||10|U|G</Grants>
-      <IntrospectionStateNumber>785</IntrospectionStateNumber>
+      <IntrospectionStateNumber>839</IntrospectionStateNumber>
       <ObjectId>13754</ObjectId>
       <Relations>sequence|table|16394|16395|1
 sequence|table|16403|16404|1
-sequence|table|16413|16414|1
 </Relations>
       <OwnerName>postgres</OwnerName>
     </database>
     <role id="3" parent="1" name="pg_database_owner">
       <ObjectId>6171</ObjectId>
     </role>
-    <role id="4" parent="1" name="pg_execute_server_program">
-      <ObjectId>4571</ObjectId>
+    <role id="4" parent="1" name="pg_read_all_data">
+      <ObjectId>6181</ObjectId>
     </role>
-    <role id="5" parent="1" name="pg_monitor">
+    <role id="5" parent="1" name="pg_write_all_data">
+      <ObjectId>6182</ObjectId>
+    </role>
+    <role id="6" parent="1" name="pg_monitor">
       <ObjectId>3373</ObjectId>
       <RoleGrants>3374
 3375
 3377</RoleGrants>
-    </role>
-    <role id="6" parent="1" name="pg_read_all_data">
-      <ObjectId>6181</ObjectId>
     </role>
     <role id="7" parent="1" name="pg_read_all_settings">
       <ObjectId>3374</ObjectId>
@@ -838,20 +829,20 @@ sequence|table|16413|16414|1
     <role id="8" parent="1" name="pg_read_all_stats">
       <ObjectId>3375</ObjectId>
     </role>
-    <role id="9" parent="1" name="pg_read_server_files">
-      <ObjectId>4569</ObjectId>
-    </role>
-    <role id="10" parent="1" name="pg_signal_backend">
-      <ObjectId>4200</ObjectId>
-    </role>
-    <role id="11" parent="1" name="pg_stat_scan_tables">
+    <role id="9" parent="1" name="pg_stat_scan_tables">
       <ObjectId>3377</ObjectId>
     </role>
-    <role id="12" parent="1" name="pg_write_all_data">
-      <ObjectId>6182</ObjectId>
+    <role id="10" parent="1" name="pg_read_server_files">
+      <ObjectId>4569</ObjectId>
     </role>
-    <role id="13" parent="1" name="pg_write_server_files">
+    <role id="11" parent="1" name="pg_write_server_files">
       <ObjectId>4570</ObjectId>
+    </role>
+    <role id="12" parent="1" name="pg_execute_server_program">
+      <ObjectId>4571</ObjectId>
+    </role>
+    <role id="13" parent="1" name="pg_signal_backend">
+      <ObjectId>4200</ObjectId>
     </role>
     <role id="14" parent="1" name="postgres">
       <BypassRls>1</BypassRls>
@@ -4242,7 +4233,7 @@ sequence|table|16413|16414|1
     <schema id="262" parent="2" name="public">
       <Comment>standard public schema</Comment>
       <Current>1</Current>
-      <IntrospectionStateNumber>785</IntrospectionStateNumber>
+      <IntrospectionStateNumber>839</IntrospectionStateNumber>
       <ObjectId>2200</ObjectId>
       <StateNumber>527</StateNumber>
       <OwnerName>postgres</OwnerName>
@@ -4259,12 +4250,12 @@ sequence|table|16413|16414|1
       <StateNumber>738</StateNumber>
       <OwnerName>postgres</OwnerName>
     </sequence>
-    <sequence id="265" parent="262" name="users_id_seq">
-      <DataType>integer|0s</DataType>
-      <ObjectId>16413</ObjectId>
-      <StateNumber>772</StateNumber>
+    <table id="265" parent="262" name="authentication_session">
+      <ObjectId>16437</ObjectId>
+      <StateNumber>836</StateNumber>
+      <AccessMethodId>2</AccessMethodId>
       <OwnerName>postgres</OwnerName>
-    </sequence>
+    </table>
     <table id="266" parent="262" name="home_model">
       <ObjectId>16404</ObjectId>
       <StateNumber>764</StateNumber>
@@ -4277,13 +4268,90 @@ sequence|table|16413|16414|1
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>postgres</OwnerName>
     </table>
-    <table id="268" parent="262" name="users">
-      <ObjectId>16414</ObjectId>
-      <StateNumber>772</StateNumber>
+    <table id="268" parent="262" name="user_base">
+      <ObjectId>16424</ObjectId>
+      <StateNumber>823</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>postgres</OwnerName>
     </table>
-    <column id="269" parent="266" name="id">
+    <table id="269" parent="262" name="user_profile">
+      <ObjectId>16431</ObjectId>
+      <StateNumber>813</StateNumber>
+      <AccessMethodId>2</AccessMethodId>
+      <OwnerName>postgres</OwnerName>
+    </table>
+    <column id="270" parent="265" name="session_id">
+      <DataType>uuid|0s</DataType>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StateNumber>818</StateNumber>
+      <TypeId>2950</TypeId>
+    </column>
+    <column id="271" parent="265" name="username">
+      <DataType>varchar(50)|0s</DataType>
+      <Position>2</Position>
+      <StateNumber>818</StateNumber>
+      <TypeId>1043</TypeId>
+    </column>
+    <column id="272" parent="265" name="token">
+      <DataType>text|0s</DataType>
+      <Position>3</Position>
+      <StateNumber>818</StateNumber>
+      <TypeId>25</TypeId>
+    </column>
+    <column id="273" parent="265" name="mac_address">
+      <DataType>varchar(255)|0s</DataType>
+      <Position>4</Position>
+      <StateNumber>828</StateNumber>
+      <TypeId>1043</TypeId>
+    </column>
+    <column id="274" parent="265" name="os">
+      <DataType>text|0s</DataType>
+      <Position>5</Position>
+      <StateNumber>829</StateNumber>
+      <TypeId>25</TypeId>
+    </column>
+    <column id="275" parent="265" name="other_info">
+      <DataType>text|0s</DataType>
+      <Position>6</Position>
+      <StateNumber>830</StateNumber>
+      <TypeId>25</TypeId>
+    </column>
+    <column id="276" parent="265" name="authentication_date">
+      <DataType>date|0s</DataType>
+      <DefaultExpression>now()</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>7</Position>
+      <StateNumber>836</StateNumber>
+      <TypeId>1082</TypeId>
+    </column>
+    <index id="277" parent="265" name="authentication_session_pk">
+      <ClassIds>10065</ClassIds>
+      <ColNames>session_id</ColNames>
+      <CollationIds>0</CollationIds>
+      <ObjectId>16442</ObjectId>
+      <Primary>1</Primary>
+      <StateNumber>818</StateNumber>
+      <Unique>1</Unique>
+      <AccessMethodId>403</AccessMethodId>
+    </index>
+    <index id="278" parent="265" name="authentication_session_session_id_uindex">
+      <ClassIds>10065</ClassIds>
+      <ColNames>session_id</ColNames>
+      <CollationIds>0</CollationIds>
+      <ObjectId>16444</ObjectId>
+      <StateNumber>819</StateNumber>
+      <Unique>1</Unique>
+      <AccessMethodId>403</AccessMethodId>
+    </index>
+    <key id="279" parent="265" name="authentication_session_pk">
+      <ColNames>session_id</ColNames>
+      <ObjectId>16443</ObjectId>
+      <Primary>1</Primary>
+      <StateNumber>818</StateNumber>
+      <UnderlyingIndexId>16442</UnderlyingIndexId>
+    </key>
+    <column id="280" parent="266" name="id">
       <DataType>integer|0s</DataType>
       <DefaultExpression>nextval(&apos;home_model_id_seq&apos;::regclass)</DefaultExpression>
       <NotNull>1</NotNull>
@@ -4291,25 +4359,25 @@ sequence|table|16413|16414|1
       <StateNumber>746</StateNumber>
       <TypeId>23</TypeId>
     </column>
-    <column id="270" parent="266" name="title">
+    <column id="281" parent="266" name="title">
       <DataType>varchar(255)|0s</DataType>
       <Position>2</Position>
       <StateNumber>751</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="271" parent="266" name="content">
+    <column id="282" parent="266" name="content">
       <DataType>varchar|0s</DataType>
       <Position>3</Position>
       <StateNumber>752</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="272" parent="266" name="ownerid">
+    <column id="283" parent="266" name="ownerid">
       <DataType>integer|0s</DataType>
       <Position>4</Position>
       <StateNumber>764</StateNumber>
       <TypeId>23</TypeId>
     </column>
-    <index id="273" parent="266" name="home_model_id_uindex">
+    <index id="284" parent="266" name="home_model_id_uindex">
       <ClassIds>1978</ClassIds>
       <ColNames>id</ColNames>
       <CollationIds>0</CollationIds>
@@ -4318,7 +4386,7 @@ sequence|table|16413|16414|1
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <index id="274" parent="266" name="home_model_pk">
+    <index id="285" parent="266" name="home_model_pk">
       <ClassIds>1978</ClassIds>
       <ColNames>id</ColNames>
       <CollationIds>0</CollationIds>
@@ -4328,14 +4396,14 @@ sequence|table|16413|16414|1
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <key id="275" parent="266" name="home_model_pk">
+    <key id="286" parent="266" name="home_model_pk">
       <ColNames>id</ColNames>
       <ObjectId>16409</ObjectId>
       <Primary>1</Primary>
       <StateNumber>746</StateNumber>
       <UnderlyingIndexId>16408</UnderlyingIndexId>
     </key>
-    <column id="276" parent="267" name="id">
+    <column id="287" parent="267" name="id">
       <DataType>integer|0s</DataType>
       <DefaultExpression>nextval(&apos;snippets_id_seq&apos;::regclass)</DefaultExpression>
       <NotNull>1</NotNull>
@@ -4343,19 +4411,19 @@ sequence|table|16413|16414|1
       <StateNumber>738</StateNumber>
       <TypeId>23</TypeId>
     </column>
-    <column id="277" parent="267" name="name">
+    <column id="288" parent="267" name="name">
       <DataType>varchar(255)|0s</DataType>
       <Position>2</Position>
       <StateNumber>738</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="278" parent="267" name="description">
+    <column id="289" parent="267" name="description">
       <DataType>text|0s</DataType>
       <Position>3</Position>
       <StateNumber>738</StateNumber>
       <TypeId>25</TypeId>
     </column>
-    <index id="279" parent="267" name="snippets_pk">
+    <index id="290" parent="267" name="snippets_pk">
       <ClassIds>1978</ClassIds>
       <ColNames>id</ColNames>
       <CollationIds>0</CollationIds>
@@ -4365,68 +4433,132 @@ sequence|table|16413|16414|1
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <key id="280" parent="267" name="snippets_pk">
+    <key id="291" parent="267" name="snippets_pk">
       <ColNames>id</ColNames>
       <ObjectId>16402</ObjectId>
       <Primary>1</Primary>
       <StateNumber>738</StateNumber>
       <UnderlyingIndexId>16401</UnderlyingIndexId>
     </key>
-    <column id="281" parent="268" name="id">
-      <DataType>integer|0s</DataType>
-      <DefaultExpression>nextval(&apos;users_id_seq&apos;::regclass)</DefaultExpression>
+    <column id="292" parent="268" name="id">
+      <DataType>uuid|0s</DataType>
       <NotNull>1</NotNull>
       <Position>1</Position>
-      <StateNumber>772</StateNumber>
-      <TypeId>23</TypeId>
+      <StateNumber>803</StateNumber>
+      <TypeId>2950</TypeId>
     </column>
-    <column id="282" parent="268" name="username">
+    <column id="293" parent="268" name="username">
       <DataType>varchar(50)|0s</DataType>
       <NotNull>1</NotNull>
       <Position>2</Position>
-      <StateNumber>772</StateNumber>
+      <StateNumber>803</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="283" parent="268" name="hashed_password">
+    <column id="294" parent="268" name="password">
       <DataType>varchar(255)|0s</DataType>
-      <NotNull>1</NotNull>
       <Position>3</Position>
-      <StateNumber>777</StateNumber>
+      <StateNumber>803</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="284" parent="268" name="is_active">
-      <DataType>boolean|0s</DataType>
-      <DefaultExpression>true</DefaultExpression>
+    <column id="295" parent="268" name="email">
+      <DataType>varchar(255)|0s</DataType>
       <Position>4</Position>
-      <StateNumber>772</StateNumber>
-      <TypeId>16</TypeId>
+      <StateNumber>823</StateNumber>
+      <TypeId>1043</TypeId>
     </column>
-    <index id="285" parent="268" name="users_pk">
-      <ClassIds>1978</ClassIds>
+    <index id="296" parent="268" name="user_base_id_uindex">
+      <ClassIds>10065</ClassIds>
       <ColNames>id</ColNames>
       <CollationIds>0</CollationIds>
-      <ObjectId>16419</ObjectId>
-      <Primary>1</Primary>
-      <StateNumber>772</StateNumber>
+      <ObjectId>16429</ObjectId>
+      <StateNumber>804</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <index id="286" parent="268" name="users_username_uindex">
+    <index id="297" parent="268" name="user_base_pk">
+      <ClassIds>10065</ClassIds>
+      <ColNames>id</ColNames>
+      <CollationIds>0</CollationIds>
+      <ObjectId>16427</ObjectId>
+      <Primary>1</Primary>
+      <StateNumber>803</StateNumber>
+      <Unique>1</Unique>
+      <AccessMethodId>403</AccessMethodId>
+    </index>
+    <index id="298" parent="268" name="user_base_username_uindex">
       <ClassIds>3126</ClassIds>
       <ColNames>username</ColNames>
       <CollationIds>100</CollationIds>
       <CollationNames>default</CollationNames>
-      <ObjectId>16421</ObjectId>
-      <StateNumber>773</StateNumber>
+      <ObjectId>16430</ObjectId>
+      <StateNumber>805</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <key id="287" parent="268" name="users_pk">
+    <key id="299" parent="268" name="user_base_pk">
       <ColNames>id</ColNames>
-      <ObjectId>16420</ObjectId>
+      <ObjectId>16428</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>772</StateNumber>
-      <UnderlyingIndexId>16419</UnderlyingIndexId>
+      <StateNumber>803</StateNumber>
+      <UnderlyingIndexId>16427</UnderlyingIndexId>
+    </key>
+    <column id="300" parent="269" name="profile_id">
+      <DataType>uuid|0s</DataType>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StateNumber>813</StateNumber>
+      <TypeId>2950</TypeId>
+    </column>
+    <column id="301" parent="269" name="user_id">
+      <DataType>uuid|0s</DataType>
+      <Position>2</Position>
+      <StateNumber>813</StateNumber>
+      <TypeId>2950</TypeId>
+    </column>
+    <column id="302" parent="269" name="first_name">
+      <DataType>varchar(255)|0s</DataType>
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StateNumber>813</StateNumber>
+      <TypeId>1043</TypeId>
+    </column>
+    <column id="303" parent="269" name="last_name">
+      <DataType>varchar(50)|0s</DataType>
+      <Position>4</Position>
+      <StateNumber>813</StateNumber>
+      <TypeId>1043</TypeId>
+    </column>
+    <column id="304" parent="269" name="is_active">
+      <DataType>boolean|0s</DataType>
+      <Position>5</Position>
+      <StateNumber>813</StateNumber>
+      <TypeId>16</TypeId>
+    </column>
+    <index id="305" parent="269" name="user_profile_pk">
+      <ClassIds>10065</ClassIds>
+      <ColNames>profile_id</ColNames>
+      <CollationIds>0</CollationIds>
+      <ObjectId>16434</ObjectId>
+      <Primary>1</Primary>
+      <StateNumber>813</StateNumber>
+      <Unique>1</Unique>
+      <AccessMethodId>403</AccessMethodId>
+    </index>
+    <index id="306" parent="269" name="user_profile_profile_id_uindex">
+      <ClassIds>10065</ClassIds>
+      <ColNames>profile_id</ColNames>
+      <CollationIds>0</CollationIds>
+      <ObjectId>16436</ObjectId>
+      <StateNumber>814</StateNumber>
+      <Unique>1</Unique>
+      <AccessMethodId>403</AccessMethodId>
+    </index>
+    <key id="307" parent="269" name="user_profile_pk">
+      <ColNames>profile_id</ColNames>
+      <ObjectId>16435</ObjectId>
+      <Primary>1</Primary>
+      <StateNumber>813</StateNumber>
+      <UnderlyingIndexId>16434</UnderlyingIndexId>
     </key>
   </database-model>
 </dataSource>
