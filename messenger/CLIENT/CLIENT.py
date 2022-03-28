@@ -35,12 +35,18 @@ print("[+] Connected.")
 # prompt the client for a name
 
 s.send(json.dumps(   {
-        "case":"authorization,authentification,registration,recovery",
+        "connection_case":"registration",
         "authentification_check": False,
-        "authentification_token": "token1",
-        "authorization_check": True,
-        "authorization_data": ["user1","password1"],
-
+        # "authentification_token": "7498317b-5fea-4692-b74c-d64a7b0d4861",
+        "authorization_check": False,
+        # "authorization_data": ["user1","password1"],
+        "registration_data":{
+            "username":"user5w",
+            "password":"password3",
+            "first_name":"first_name3",
+            "last_name":"last_name3",
+            "email":"email3"
+        }
     }
 ).encode())
 print("sent")
@@ -74,14 +80,28 @@ t.start()
 while True:
     # input message we want to send to the server
     to_send =  input()
-    username = input()
-    # a way to exit the program
     if to_send.lower() == 'q':
         break
-    # add the datetime, name & the color of the sender
-    date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    to_send = f"{client_color}[{date_now}]{separator_token}{to_send}{Fore.RESET}----{username}"
-    # finally, send the message
+    # try:
+    #     to_send = int(to_send)
+    #     if to_send == 1:
+    #         s.send("dawdaw daw")
+    #     elif to_send == 2:
+    #         with open("C:/Users/flame/Desktop/students/",'rb') as f:
+    #
+    #
+    #     elif to_send == 3:
+    #         pass
+    #     else:
+    #         pass
+    #
+    # except Exception as e:
+    #     print(to_send)
+    #     # a way to exit the program
+    #     # add the datetime, name & the color of the sender
+    #     date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    #     to_send = f"{client_color}[{date_now}]{separator_token}{to_send}"
+    #     # finally, send the message
     s.send(to_send.encode())
 
 # close the socket
