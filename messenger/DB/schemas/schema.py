@@ -175,14 +175,17 @@ class UserSchema:
                 cur = con.cursor()
                 id = str(uuid.uuid4())
                 cur.execute(sql1,(id,user.username,user.password,user.email))
-                con.commit()
+                # con.commit()
                 commited = True
                 try:
                     cur.execute(sql2, (str(uuid.uuid4()),id, user.first_name, user.last_name, False))
                     con.commit()
                     commited = True
+                except psycopg2.IntegrityError as e:
+                    return {'created': False,'errors':['username_taken']}
                 except Exception as e:
                     print(e,'user profile creation error')
+                    {'created': False, 'errors': ['server_error']}
 
             except Exception as e:
                 print(e,"base user createion error")

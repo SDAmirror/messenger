@@ -9,25 +9,41 @@ class Validator:
         return code
 
     def send_code(self, receiver_email, code):
+        result = {'result': {}, 'errors': []}
         port = 465  # For SSL
         smtp_server = "smtp.gmail.com"
-        # password = input("Type your password and press enter: ")
-        password = "doripass568word"
+        # password = "doripass568word"
+        sender = "myvideoboxdsa@gmail.com"
+        # receiver_email = "flamehst@mail.ru"
+        password = 'ziqzxjotlibxpkfq'
+        # sender = "amanbolganovadaria@gmail.com"
 
-        sender = "amanbolganovadaria@gmail.com"
-        receiver = "damanbolghanova@gmail.com"
-
-        message = """From: Check <amanbolganovadaria@gmail.com>
+        message = """Check:
         Subject: SMTP e-mail test
-        YOUR CODE is """ + self.generate_code()
+        YOUR CODE is """ + code
 
         # Create a secure SSL context
-        context = ssl.create_default_context()
+        try:
+            context = ssl.create_default_context()
+        except Exception as e:
+            print(e)
+            result['errors'] = "SSL context creation error"
 
         with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-            server.login(sender, password)
+            try:
+                server.login(sender, password)
+            except Exception as e:
+                print(e)
+                result['errors'] = "Server login error"
+
             # Send email here
-            server.sendmail(sender, receiver, message)
+            try:
+                server.sendmail(sender, receiver_email, message)
+            except Exception as e:
+                result['errors'] = "Server error: couldn't send code"
 
-    # def validate(self, user, code, code_received):
+        return result
 
+    def validate(self, user, code_generated, code_received):
+        if (code_generated == code_received):
+            return True

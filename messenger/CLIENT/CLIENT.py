@@ -41,11 +41,11 @@ s.send(json.dumps(   {
         "authorization_check": False,
         # "authorization_data": ["user1","password1"],
         "registration_data":{
-            "username":"user5w",
+            "username":"useryw",
             "password":"password3",
             "first_name":"first_name3",
             "last_name":"last_name3",
-            "email":"email3"
+            "email":"flamehst@mail.ru"
         }
     }
 ).encode())

@@ -1,12 +1,15 @@
 #-------------------------------------------------------------------------------------------------------------------
 import concurrent.futures
 import socket
+import ssl
 import uuid
-from socket import *
+
 from concurrent.futures import ProcessPoolExecutor as Pool
-from pkg import connection_processor
 from collections import deque
 from select import select
+
+
+
 
 #postgres
 #123456
@@ -21,7 +24,7 @@ recv_wait = {}
 send_wait = {}
 future_wait = {}
 
-future_notify,future_event = socketpair()
+future_notify,future_event = socket.socketpair()
 def future_done(future):
     tasks.append(future_wait.pop(future))
     future_notify.send(b'x')
@@ -38,7 +41,7 @@ class somestruct:
 
 ##fibtype
 def message_processor(message):
-    return 44124
+    return str(message)+'recieved'
 
 
 def run():
@@ -78,15 +81,6 @@ def run():
 
 def client_handler(client,id):
 
-    future = pool.submit(connection_processor.connection_processor,client)
-    yield 'future', future
-    connectionSuccessFlag = future.result()
-    print(connectionSuccessFlag)
-    if not connectionSuccessFlag:
-        active_clients.pop(id)
-        client.close()
-        return
-
     while True:
 
 
@@ -123,46 +117,38 @@ def client_handler(client,id):
 
 
 
-
-
-
-
-
-
-
 def base_server(address):
-    sock = socket(AF_INET, SOCK_STREAM)
-    sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-    sock.bind(address)
-    sock.listen(5)
-    print('connected')
-    while True:
-        yield 'recv',sock
-        client, addr = sock.accept()
-        id = uuid.uuid4()
-        print(f"[+] {client} connected with id {id}")
-        active_clients[id] =client
-        # t = Thread(target=fib_handler,args=(client,),daemon=True)
-        # t.start()
-        # fib_handler(client)
-        tasks.append(client_handler(client,id))
+    # sk = open('server.key','br')
+    # sc = open('server.crt','br')
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    context.load_cert_chain('server.crt','server.key',password='firstkey')
+
+    ssock= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    ssock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    ssock.bind(address)
+    ssock.listen(5)
+    with context.wrap_socket(ssock, server_side=True) as sock:
+        print('got')
+
+        while True:
+            yield 'recv',sock
+            client, addr = sock.accept()
+            id = uuid.uuid4()
+            print(f"[+] {client} connected with id {id}")
+            active_clients[id] =client
+            # t = Thread(target=fib_handler,args=(client,),daemon=True)
+            # t.start()
+            # fib_handler(client)
+            tasks.append(client_handler(client,id))
 
 
 
 
 
 
-tasks.append(base_server(('localhost', 8888)))
+tasks.append(base_server(('localhost', 4430)))
 
 if __name__ == '__main__':
     run()
 
 
-
-#postgresql cursor
-
-# 20000-50000
-
-#while online
-    # cursor work
-#

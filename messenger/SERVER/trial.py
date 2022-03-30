@@ -105,16 +105,21 @@
 #         sender_email, receiver_email, message.as_string()
 #     )
 import random
+import re
 import time
 
-# import rsa
-# pk = rsa.PrivateKey,
+def email_validation(email):
+    email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    if (re.fullmatch(email_pattern, email)):
+        return True
+    else:
+        return False
 
 ts = time.time()
-# pr,pb = rsa.newkeys(1024)
-
-# import ssl
-
+res = email_validation("wwdwad,@del.cw")
 te = time.time()
-print(te-ts)
-# print(te-ts,'\n',type(pr),'\n',pr,'\n',type(pb),'\n',pb,'\n')
+print(te-ts,res)
+
+
+
+
