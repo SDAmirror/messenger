@@ -2,16 +2,19 @@
 import concurrent.futures
 import socket
 import uuid
+import rsa
 from socket import *
 from concurrent.futures import ProcessPoolExecutor as Pool
+from pkg.message_processor import Message_Sender,Message_Recirver,Message_Processor
+from pkg import message_processor
 from pkg import connection_processor
 from collections import deque
 from select import select
-
+from pkg.MessageCtryptor import RSACryptor
 #postgres
 #123456
 
-
+keypairs  = {}
 active_clients = {}
 
 tasks = deque()
@@ -37,8 +40,7 @@ class somestruct:
         self.id = id
 
 ##fibtype
-def message_processor(message):
-    return 44124
+
 
 
 def run():
@@ -76,9 +78,23 @@ def run():
             print('task done')
             continue
 
-def client_handler(client,id):
 
-    future = pool.submit(connection_processor.connection_processor,client)
+
+
+
+
+
+
+def client_handler(client,id):
+    cryptor = RSACryptor(id)
+    #pub = create_keys(id)
+        # priv,pub
+        # prive,pub file write.
+    # 'priv'+str(id)+'.pem'
+    # 'pub'+str(id)+'.pem'
+    # client.send(pub)
+
+    future = pool.submit(connection_processor.connection_processor,client,id,cryptor)
     yield 'future', future
     connectionSuccessFlag = future.result()
     print(connectionSuccessFlag)
@@ -86,7 +102,8 @@ def client_handler(client,id):
         active_clients.pop(id)
         client.close()
         return
-
+    # recirver = Message_Recirver
+    # sender = Message_Sender
     while True:
 
 
@@ -96,14 +113,14 @@ def client_handler(client,id):
             yield 'recv', client
             message = client.recv(1024).decode()
             print(message)
-            if not message:
-                break
 
-            future = pool.submit(message_processor, message)
+
+            future = pool.submit(message_processor.message_processor, message)
             yield 'future', future
             result = future.result()
-            # result = fib(n)
+
             resp = str(result).encode()
+
             yield 'send', client
             try:
                 client.send(resp)

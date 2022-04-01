@@ -157,6 +157,8 @@ class UserSchema:
             finally:
                 cur.close()
                 con.close()
+        except psycopg2.OperationalError.ConnectionFailure as e:
+            print(e)
         except Exception as e:
             commited = False
             print("connection error", e)

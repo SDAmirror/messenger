@@ -5,6 +5,7 @@ from DB.schemas.schema import UserSchema
 from DB.models.user_model import CreateUser
 from DB.models.user_model import AuthenticatedUser
 from .email_validation import Validator
+from message_processor import *
 import rsa
 
 """
@@ -27,7 +28,8 @@ authorization_check:
 authentification_token: token
 authorization: [username,password]
 """
-
+message_recirver = Message_Recirver()
+message_sender = Message_Sender()
 
 def authorisation(username, password):
     userSchema = UserSchema()
@@ -89,12 +91,15 @@ def email_validation(email):
 # except EmailNotValidError as errorMsg:
 #     print(str(errorMsg))
 
-def connection_processor(client):
+def connection_processor(client, id,cryptor):
+    global message_sender
+    global message_recirver
+    message_sender.cryptor = cryptor
+    message_recirver.cryptor = cryptor
     print("processors")
     flag_processor_success = False
-
     message = client.recv(1024).decode()
-    message = str(message)
+    message = message_recirver.recieve_message(id, str(message))
     userSchema = UserSchema()
 
 

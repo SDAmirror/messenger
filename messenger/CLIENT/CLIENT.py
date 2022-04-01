@@ -38,8 +38,8 @@ s.send(json.dumps(   {
         "connection_case":"registration",
         "authentification_check": False,
         # "authentification_token": "7498317b-5fea-4692-b74c-d64a7b0d4861",
-        "authorization_check": False,
-        # "authorization_data": ["user1","password1"],
+        "authorization_check": True,
+        "authorization_data": ["user1","password1"],
         "registration_data":{
             "username":"useryw",
             "password":"password3",
@@ -55,7 +55,7 @@ m = s.recv(1024).decode()
 print(m,'recived')
 mess = json.loads(str(m))
 print(mess)
-if mess['auth_succses']:
+if mess['auth_success']:
     print(mess['AuthenticationUser'])
 else:
     print("failed")
