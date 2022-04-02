@@ -4,17 +4,19 @@ import socket
 import ssl
 import uuid
 import rsa
-from socket import *
+import logging
 from concurrent.futures import ProcessPoolExecutor as Pool
-from pkg.message_processor import Message_Sender, Message_Recirver, Message_Processor
+# from pkg.message_processor import Message_Sender, Message_Recirver, Message_Processor
 from pkg import message_processor
 from pkg import connection_processor
 from collections import deque
 from select import select
 from pkg.MessageCtryptor import RSACryptor
+from logger import Logging
 
 # postgres
 # 123456
+loger = 1
 
 keypairs = {}
 active_clients = {}
@@ -26,7 +28,7 @@ recv_wait = {}
 send_wait = {}
 future_wait = {}
 
-future_notify, future_event = socketpair()
+future_notify, future_event = socket.socketpair()
 
 
 def future_done(future):
@@ -42,6 +44,10 @@ def future_monitor():
 
 
 tasks.append(future_monitor())
+
+logger_temp=Logging()
+logger = logger_temp.logger
+
 
 
 class somestruct:
@@ -72,7 +78,6 @@ def run():
             task = tasks.pop()
             why, what = next(task)
             if why == 'recv':
-                # penalty box
                 recv_wait[what] = task
             elif why == 'send':
                 send_wait[what] = task
@@ -88,8 +93,33 @@ def run():
 
 
 def client_handler(client, id):
+    global logger
+    logger.log(logging.INFO,'creation of server keys')
     cryptor = RSACryptor(id)
+    cryptor.generate_RSA_keys()
+    try:
+        ress = cryptor.load_Public_key()
+        if ress['key']==None:
+            print("key not found") # ЭТО ОШИБКА тоже
+            print(ress['errors'])
 
+        key = ress['key'].save_pkcs1().decode('utf-8')
+
+        client.send(key.encode())
+    except ConnectionResetError as e:
+        print(f"client {id} disconnected")
+        client.close()
+
+    try:
+
+        public_key = client.recv(1024).decode()
+        cryptor.set_client_public_key(public_key)
+    except ConnectionResetError as e:
+        print(f"client {id} disconnected")
+        client.close()
+
+    message_sender = message_processor.Message_Sender(cryptor)
+    message_receiver = message_processor.Message_Recirver(cryptor)
     # pub = create_keys(id)
     # priv,pub
     # prive,pub file write.
@@ -97,7 +127,8 @@ def client_handler(client, id):
     # 'pub'+str(id)+'.pem'
     # client.send(pub)
 
-    future = pool.submit(connection_processor.connection_processor, client, id, cryptor)
+
+    future = pool.submit(connection_processor.connection_processor, client, id, cryptor,logger)
     yield 'future', future
     connectionSuccessFlag = future.result()
     print(connectionSuccessFlag)
@@ -105,8 +136,7 @@ def client_handler(client, id):
         active_clients.pop(id)
         client.close()
         return
-    # recirver = Message_Recirver
-    # sender = Message_Sender
+
     while True:
 
         # TODO try catch if client disconnected then delete this socket
@@ -116,7 +146,7 @@ def client_handler(client, id):
             message = client.recv(1024).decode()
             print(message)
 
-            future = pool.submit(message_processor.message_processor, message)
+            future = pool.submit(message_processor.message_processor, message,logger)
             yield 'future', future
             result = future.result()
 
@@ -138,6 +168,7 @@ def client_handler(client, id):
 
 
 def base_server(address):
+    logger.log(logging.INFO,'creation of base server')
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     context.load_cert_chain('server.crt', 'server.key', password='firstkey')
 
@@ -146,12 +177,8 @@ def base_server(address):
     ssock.bind(address)
     ssock.listen(5)
     with context.wrap_socket(ssock, server_side=True) as sock:
-        #
-        # sock = socket(AF_INET, SOCK_STREAM)
-        # sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-        # sock.bind(address)
-        # sock.listen(5)
-        # print('connected')
+        print('got')
+
         while True:
             yield 'recv', sock
             client, addr = sock.accept()
@@ -164,7 +191,7 @@ def base_server(address):
             tasks.append(client_handler(client, id))
 
 
-tasks.append(base_server(('localhost', 8888)))
+tasks.append(base_server(('localhost', 4430)))
 
 if __name__ == '__main__':
     run()

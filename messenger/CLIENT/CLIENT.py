@@ -1,5 +1,6 @@
 import socket
 import random
+import ssl
 import sys
 from threading import Thread
 from datetime import datetime
@@ -7,6 +8,9 @@ from colorama import Fore, init
 import json
 
 # init colors
+import message_processor
+from  MessageCtryptor import RSACryptor
+
 init()
 # set the available colors
 colors = [Fore.BLUE, Fore.CYAN, Fore.GREEN, Fore.LIGHTBLACK_EX,
@@ -22,17 +26,33 @@ client_color = random.choice(colors)
 # if the server is not on this machine, 
 # put the private (network) IP address (e.g 192.168.1.2)
 SERVER_HOST = "localhost"
-SERVER_PORT = 8888  # server's port
+SERVER_PORT = 4430  # server's port
 separator_token = "<SEP>"  # we will use this to separate the client name & message
 
-# initialize TCP socket
-s = socket.socket()
-print(f"[*] Connecting to {SERVER_HOST}:{SERVER_PORT}...")
-# connect to the server
-s.connect((SERVER_HOST, SERVER_PORT))
-print("[+] Connected.")
+cryptor = RSACryptor(1)
+cryptor.generate_RSA_keys()
 
-# prompt the client for a name
+message_sender = message_processor.Message_Sender(cryptor)
+message_receiver = message_processor.Message_Recirver(cryptor)
+
+s = ssl.wrap_socket(socket.socket())
+s.connect((SERVER_HOST, SERVER_PORT))
+
+print("[+] Connected.")
+try:
+    server_public_key = s.recv(1024).decode()
+    cryptor.set_server_public_key(server_public_key)
+except ConnectionResetError as e:
+    print(f"client {id} disconnected")
+    s.close()
+try:
+    key = message_sender.send_message(1,cryptor.load_Public_key()['key'].save_pkcs1().decode('utf-8'))
+    s.send(key.encode())
+except ConnectionResetError as e:
+    print(f"client {id} disconnected")
+    s.close()
+
+
 
 s.send(json.dumps({
     "connection_case": "registration",

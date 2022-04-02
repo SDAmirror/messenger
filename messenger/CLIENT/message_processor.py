@@ -1,4 +1,4 @@
-def message_processor(message,logger):
+def message_processor(message):
     return 44124
 
 

@@ -6,19 +6,19 @@ class RSACryptor:
     def __init__(self,id):
         self.id = id
     def load_Private_key(self):
-        with open(f'pkg/CLIENTSpackage/rsa_keys/private{self.id}.pem', 'r') as privatefile:
+        with open(f'private{self.id}.pem', 'r') as privatefile:
             priv = rsa.PrivateKey.load_pkcs1(privatefile.read(), 'PEM')
             return {'key':priv,'errors':[]}
     def load_Public_key(self):
-        with open(f'pkg/CLIENTSpackage/rsa_keys/public{self.id}.pem', 'r') as publicfile:
+        with open(f'public{self.id}.pem', 'r') as publicfile:
             pub = rsa.PublicKey.load_pkcs1(publicfile.read())
             return {'key':pub,'errors':[]}
 
-    def load_client_Public_key(self):
-        with open(f'pkg/CLIENTSpackage/rsa_keys/client_public{self.id}.pem', 'r') as cl_publicfile:
+    def load_server_Public_key(self):
+        with open(f'server_public{self.id}.pem', 'r') as cl_publicfile:
             pub = rsa.PublicKey.load_pkcs1(cl_publicfile.read())
             return {'key':pub,'errors':[]}
-        return {'key': None, 'errors': ['error']}
+
     def decrypt(self,message):
         key = self.load_Private_key()
 
@@ -29,8 +29,7 @@ class RSACryptor:
         return message
 
     def encrypt(self,message):
-        ress = self.load_client_Public_key()
-        key = ress['key']
+        key = self.load_server_Public_key()
         try:
             message = rsa.encrypt(message,key)
         except Exception as e:
@@ -39,7 +38,7 @@ class RSACryptor:
 
 
     def delete_RSA_keys(self,id):
-        path = 'CLIENTSpackage/rsa_keys/{}'
+        path = '{}'
         try:
             os.remove(path.format(f'private{id}.pem'))
         except FileNotFoundError as e:
@@ -55,7 +54,7 @@ class RSACryptor:
         try:
             os.remove(path.format(f'client_public{self.id}.pem'))
         except FileNotFoundError as e:
-            print('file: {} not found'.format(path.format(f'client_public{self.id}.pem')), e)
+            print('file: {} not found'.format(path.format(f'server_public{self.id}.pem')), e)
         except OSError as error:
             print("There was an error.", error)
 
@@ -63,14 +62,14 @@ class RSACryptor:
         (pub, priv) = rsa.newkeys(1024)
 
 
-        with open(f'pkg/CLIENTSpackage/rsa_keys/private{self.id}.pem', 'w') as priv_key_file:
+        with open(f'private{self.id}.pem', 'w') as priv_key_file:
             priv_key_file.write(priv.save_pkcs1().decode('utf-8'))
 
-        with open(f'pkg/CLIENTSpackage/rsa_keys/public{self.id}.pem', 'w') as pub_key_file:
+        with open(f'public{self.id}.pem', 'w') as pub_key_file:
             pub_key_file.write(pub.save_pkcs1().decode('utf-8'))
 
-    def set_client_public_key(self,key):
-        with open(f'pkg/CLIENTSpackage/rsa_keys/client_public{self.id}.pem', 'w') as cl_publicfile:
+    def set_server_public_key(self,key):
+        with open(f'server_public{self.id}.pem', 'w') as cl_publicfile:
             cl_publicfile.write(key)
 
 
