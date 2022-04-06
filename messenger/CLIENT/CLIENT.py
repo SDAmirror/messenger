@@ -40,7 +40,7 @@ s.connect((SERVER_HOST, SERVER_PORT))
 
 print("[+] Connected.")
 try:
-    server_public_key = s.recv(1024).decode()
+    server_public_key = s.recv(2048).decode()
     cryptor.set_server_public_key(server_public_key)
 except ConnectionResetError as e:
     print(f"client {id} disconnected")
@@ -55,21 +55,21 @@ except ConnectionResetError as e:
 
 
 s.send(json.dumps({
-    "connection_case": "registration",
+    "url": "authorisation",
     "authentification_check": False,
-    # "authentification_token": "7498317b-5fea-4692-b74c-d64a7b0d4861",
-    "authorization_check": True,
+    "authentification_token": "d3a5f6cb-01a8-4bff-b076-64550ff85921",
+    "authorization_check": False,
     "authorization_data": ["user1", "password1"],
-    "registration_data": {
-        "username": "useryw",
-        "password": "password3",
-        "first_name": "first_name3",
-        "last_name": "last_name3",
-        "email": "flamehst@mail.ru"
-    }
+    # "registration_data": {
+    #     "username": "useryw",
+    #     "password": "password3",
+    #     "first_name": "first_name3",
+    #     "last_name": "last_name3",
+    #     "email": "flamehst@mail.ru"
+    # }
 }).encode())
 print("sent")
-m = s.recv(1024).decode()
+m = s.recv(2048).decode()
 
 print(m, 'recived')
 mess = json.loads(str(m))
@@ -78,10 +78,11 @@ if mess['auth_success']:
     print(mess['AuthenticationUser'])
 else:
     print("failed")
+    s.close()
 
 def listen_for_messages():
     while True:
-        message = s.recv(1024).decode()
+        message = s.recv(2048).decode()
         if not message:
             print("closed")
             break
@@ -98,7 +99,10 @@ t.start()
 while True:
     # input message we want to send to the server
     to_send = input()
+    if to_send == '':
+        to_send = '1'
     if to_send.lower() == 'q':
+        s.close()
         break
     # try:
     #     to_send = int(to_send)

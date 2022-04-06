@@ -7,7 +7,8 @@ class Message_Recirver:
         self.cryptor = cryptor
 
     def recieve_message(self, id, message):
-        return self.cryptor.decrypt(message)
+        # return self.cryptor.decrypt(message)
+        return message
 
 
 class Message_Sender:
@@ -15,7 +16,8 @@ class Message_Sender:
         self.cryptor = cryptor
 
     def send_message(self, id, message):
-        return self.cryptor.encrypt(message)
+        # return self.cryptor.encrypt(message)
+        return message
 
 
 class Message_Processor:

@@ -29,9 +29,9 @@ class RSACryptor:
         return message
 
     def encrypt(self,message):
-        key = self.load_server_Public_key()
+        ress = self.load_server_Public_key()
         try:
-            message = rsa.encrypt(message,key)
+            message = rsa.encrypt(message,ress['key'])
         except Exception as e:
             print(e)
         return message

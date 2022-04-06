@@ -98,8 +98,8 @@ class UserSchema:
                     return_block = {"user": user, "errors": []}
                 else:
                     return_block = {"user": None, "errors": []}
-            # except Exception as e:
-            #     return_block = {"user": None, "errors": [e]}
+            except Exception as e:
+                return_block = {"user": None, "errors": [e]}
             finally:
                 cur.close()
                 con.close()
@@ -145,6 +145,14 @@ class UserSchema:
         commited = False
         try:
             con = self.db.get_connection()
+            try:
+                cur = con.cursor()
+                cur.execute("delete from authentication_session where username = %s",username)
+                con.commit()
+                commited = True
+            except Exception as e:
+                print(e)
+                commited = False
 
             try:
                 cur = con.cursor()
@@ -163,6 +171,26 @@ class UserSchema:
             commited = False
             print("connection error", e)
         return commited
+    def deleteAuthToken(self,username):
+        sql = "delete from authentication_session where username = %s "
+        resp = {}
+        try:
+            con = self.db.get_connection()
+
+            try:
+                cur = con.cursor()
+                cur.execute(sql,(username,))
+                con.commit()
+                resp = {'deleted':True,'errors':[]}
+            except Exception as e:
+                resp = {'deleted': False, 'errors': [e]}
+                print(e)
+            finally:
+                cur.close()
+                con.close()
+        except Exception as e:
+            print(connection_eror)
+            resp = {'deleted': False, 'errors': [connection_eror,e]}
 
     def createNewUser(self, user):
 
@@ -184,10 +212,10 @@ class UserSchema:
                     con.commit()
                     commited = True
                 except psycopg2.IntegrityError as e:
-                    return {'created': False,'errors':['username_taken']}
+                    return {'created': False,'errors':['username_taken',e]}
                 except Exception as e:
                     print(e,'user profile creation error')
-                    {'created': False, 'errors': ['server_error']}
+                    {'created': False, 'errors': ['server_error',e]}
 
             except Exception as e:
                 print(e,"base user createion error")
