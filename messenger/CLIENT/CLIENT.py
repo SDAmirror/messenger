@@ -82,7 +82,20 @@ else:
 
 def listen_for_messages():
     while True:
+
         message = s.recv(2048).decode()
+        {
+            'sender': 'client',  # 'sender':'server'
+            'keys': True,
+            'data': {'message': 'wadawd', 'username': 'user1'}  # dawdawdwdawdawdawdawdw
+        }
+        # database check if user exist
+        # check keys
+        # if keys ok:
+        #   send message
+        # else:
+        #   renew keys
+        #database
         if not message:
             print("closed")
             break
@@ -99,11 +112,19 @@ t.start()
 while True:
     # input message we want to send to the server
     to_send = input()
+    #database check if user exist
+    #check keys
+    # if keys ok:
+    #   send message
+    #else:
+    #   renew keys
     if to_send == '':
         to_send = '1'
     if to_send.lower() == 'q':
         s.close()
         break
+    # username = input('username')
+    print()
     # try:
     #     to_send = int(to_send)
     #     if to_send == 1:
