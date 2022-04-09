@@ -215,7 +215,7 @@ class UserSchema:
                     return {'created': False,'errors':['username_taken',e]}
                 except Exception as e:
                     print(e,'user profile creation error')
-                    {'created': False, 'errors': ['server_error',e]}
+                    return {'created': False, 'errors': ['server_error',e]}
 
             except Exception as e:
                 print(e,"base user createion error")
@@ -227,4 +227,4 @@ class UserSchema:
         except Exception as e:
             commited = False
             print("connection error", e)
-        return {'created':commited}
+        return {'created':commited,'errors':[]}

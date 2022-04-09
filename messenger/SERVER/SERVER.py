@@ -23,6 +23,7 @@ loger = 1
 
 keypairs = {}
 active_clients = {}
+active_users = {}
 
 tasks = deque()
 pool = Pool(10)
@@ -92,6 +93,7 @@ def client_handler(client, id):
     logger.log(logging.INFO,'creation of server keys')
     cryptor = RSACryptor(id)
     cryptor.generate_RSA_keys()
+    user = None
     try:
         ress = cryptor.load_Public_key()
         if ress['key']==None:
@@ -143,36 +145,110 @@ def client_handler(client, id):
     #     except Exception as e:
     #         print('error asc',e)
 
+    procedure = False
     if message['url'] == 'authentication':
         fn = con_procc.user_authentication
     elif message['url'] == 'authorisation':
         fn = con_procc.user_authorisation
     elif message['url'] == 'registration':
-        fn = con_procc.user_authentication
+        procedure = True
+        fn = con_procc.user_registration_part1
+        future = pool.submit(fn, id, cryptor, logger, message)
+        yield 'future', future
+        ress = future.result()
+        if ress['success']:
+            user = ress['user']
+            validation_res = False
+            code_send_attempts = 3
+            # while code_send_attempts > 0:
+            #     fn = con_procc.user_registration_part2
+            #     future = pool.submit(fn, id, cryptor, logger, user)
+            #     yield 'future', future
+            #     ress = future.result()
+            #     if ress['success']:
+            #         code = ress['code']
+            #         attempts = 3
+            #
+            #         while attempts > 0:
+            #             try:
+            #                 message = client.recv(2048).decode()
+            #
+            #             except Exception as e:
+            #                 print(f"error: {e}")
+            #
+            #             fn = con_procc.user_registration_part3
+            #             future = pool.submit(fn,id, cryptor, logger, user,code,message)
+            #             ress = future.result()
+            #             if ress['success']:
+            #                 if ress['validation']:
+            #                     validation_res = True
+            #                     break
+            #                 else:
+            #                     response = message_sender.send_message(id,f"invalid code, you have {attempts-1} more attemps")
+            #                     client.send(response.encode())
+            #             else:
+            #                 client.send(ress['response'].encode())
+            #
+            #             attempts -= 1
+            #
+            #         code_send_attempts -= 1
+            #         if validation_res:
+            #             break
+            #         else:
+            #             response = message_sender.send_message(id,f"invalid code, we sent new code to your email")
+            #             client.send(response.encode())
+            # if validation_res:
+            if True:
+                fn = con_procc.user_registration_part4
+                future = pool.submit(fn, id, cryptor, logger, user)
+                yield 'future', future
+                ress = future.result()
+                if ress['success']:
+                    connectionSuccessFlag = True
+                    client.send(ress['response'].encode())
+                else:
+                    client.send(ress['response'].encode())
+                    connectionSuccessFlag = False
+            else:
+                response_model = message_sender.send_message(id,json.dumps({"message": "registration failed","auth_success": False}))
+                client.send(response_model.encode())
+        else:
+            client.send(ress['response'].encode())
+            client.close()
+            return
 
-    future = pool.submit(fn,id,cryptor,logger,message)
-    yield 'future', future
-    ress = future.result()
-    print(ress)
 
-    connectionSuccessFlag = ress['flag']
-    yield 'send',client
-    resp = message_sender.send_message(id,ress['responce'])
-    client.send(resp.encode())
-    # future = pool.submit(connection_processor.connection_processor, client, id, cryptor,logger)
-    # yield 'future', future
-    # connectionSuccessFlag = future.result()
-    # connectionSuccessFlag =connection_processor.connection_processor(pool,client, id, cryptor,logger)
+    if not procedure:
+        future = pool.submit(fn, id, cryptor, logger, message)
+        yield 'future', future
+        ress = future.result()
+        print(ress)
+
+        connectionSuccessFlag = ress['flag']
+
+        yield 'send',client
+        resp = message_sender.send_message(id,ress['responce'])
+        client.send(resp.encode())
+        user = ress['user']
+  
     print('connect flag server ' ,connectionSuccessFlag)
     if not connectionSuccessFlag:
         active_clients.pop(id)
         client.close()
         return
 
+    active_users[user.username] = id
+
     while True:
         try:
             yield 'recv', client
             message = client.recv(2048).decode()
+            try:
+                message = json_loader(message)
+            except Exception as e:
+                print(e,'message load error')
+                #notify client that not sent
+                continue
             print(message)
 
             future = pool.submit(message_processor.message_processor, message,logger)
