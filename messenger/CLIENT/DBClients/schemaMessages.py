@@ -1,7 +1,7 @@
-import DB.database as db
 import datetime
+import sqlite3
 
-import CLIENT.DBClients.database as db
+import messenger.CLIENT.DBClients.database as db
 
 class MessagesSchema:
     def __init__(self):
@@ -14,14 +14,14 @@ class MessagesSchema:
                 cursor = con.cursor()
                 date_time = datetime.datetime.now()
                 # sent check ?
-                cursor.execute("insert into messages values(%s, %s, %s, %s, %s')", (message, date_time.strftime("%Y-%m-%d %H:%M:%S"), sent, sender_id, 'sent'))
+                cursor.execute("insert into messages values(?, ?, ?, ?, ?)", (message, date_time.strftime("%Y-%m-%d %H:%M:%S"), sent, 'sent', sender_id))
                 con.commit()
             except Exception as e:
-                print("connection error", e)
+                print("error in sending message", e)
         except Exception as e:
-            print("error in sending message", e)
+            print("Connection error", e)
         finally:
-            db.close_connectin_sqlite(con)
+            self.db.close_connection_sqlite(con)
 
     def receive_message(self, message, sender_id):
         try:
@@ -31,14 +31,14 @@ class MessagesSchema:
                 date_time = datetime.datetime.now()
                 sent = False
                 # sent check ?
-                cursor.execute("insert into messages values(%s, %s, %s, %s, %s')", (message, date_time.strftime("%Y-%m-%d %H:%M:%S"), sent, sender_id, 'received'))
+                cursor.execute("insert into messages values(?, ?, ?, ?, ?)", (message, date_time.strftime("%Y-%m-%d %H:%M:%S"), sent, 'received', sender_id))
                 con.commit()
             except Exception as e:
                 print("connection error", e)
         except Exception as e:
             print("error in receiving message", e)
         finally:
-            db.close_connectin_sqlite(con)
+            db.close_connection_sqlite(con)
 
 
 
