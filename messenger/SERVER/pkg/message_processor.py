@@ -1,4 +1,18 @@
-def message_processor(message,logger):
+from DB.models.message_model import MessageInfo
+from DB.schemas.message_shema import MessageSchema
+
+def message_rpepare(data,loger):
+    return data
+def message_processor(data,logger):
+    if 1: return 44124
+    schema = MessageSchema()
+    reciever = data['reciever']
+    body = data['body']
+    send_date = data['send_date']
+    send_time = data['send_time']
+    message = MessageInfo()
+    schema.insert_message(message,logger)
+
     return 44124
 
 

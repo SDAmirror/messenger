@@ -12,11 +12,11 @@ class Validator:
         result = {'result': {}, 'errors': []}
         port = 465  # For SSL
         smtp_server = "smtp.gmail.com"
-        # password = "doripass568word"
-        sender = "myvideoboxdsa@gmail.com"
+        password = "doripass568word"
+        # sender = "myvideoboxdsa@gmail.com"
         # receiver_email = "flamehst@mail.ru"
-        password = 'ziqzxjotlibxpkfq'
-        # sender = "amanbolganovadaria@gmail.com"
+        # password = 'ziqzxjotlibxpkfq'
+        sender = "amanbolganovadaria@gmail.com"
 
         message = """Check:
         Subject: SMTP e-mail test
@@ -45,5 +45,5 @@ class Validator:
         return result
 
     def validate(self, user, code_generated, code_received):
-        if (code_generated == code_received):
-            return True
+        return code_generated == code_received
+

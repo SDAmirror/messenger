@@ -1,32 +1,37 @@
 import socket
-import random
 import ssl
-import sys
 from threading import Thread
-from datetime import datetime
-from colorama import Fore, init
 import json
 
-# init colors
 import message_processor
 from  MessageCtryptor import RSACryptor
 
-init()
-# set the available colors
-colors = [Fore.BLUE, Fore.CYAN, Fore.GREEN, Fore.LIGHTBLACK_EX,
-          Fore.LIGHTBLUE_EX, Fore.LIGHTCYAN_EX, Fore.LIGHTGREEN_EX,
-          Fore.LIGHTMAGENTA_EX, Fore.LIGHTRED_EX, Fore.LIGHTWHITE_EX,
-          Fore.LIGHTYELLOW_EX, Fore.MAGENTA, Fore.RED, Fore.WHITE, Fore.YELLOW
-          ]
+def listen_for_messages():
+    while True:
 
-# choose a random color for the client
-client_color = random.choice(colors)
+        message = s.recv(2048).decode()
+        {
+            'sender': 'client',  # 'sender':'server'
+            'keys': True,
+            'data': {'message': 'wadawd', 'username': 'user1'}  # dawdawdwdawdawdawdawdw
+        }
+        # database check if user exist
+        # check keys
+        # if keys ok:
+        #   send message
+        # else:
+        #   renew keys
 
-# server's IP address
-# if the server is not on this machine, 
-# put the private (network) IP address (e.g 192.168.1.2)
+        #database
+        #save to database ()
+        if not message:
+            print("closed")
+            break
+        print("\n" + message)
+
+
 SERVER_HOST = "localhost"
-SERVER_PORT = 4430  # server's port
+SERVER_PORT = 4430
 separator_token = "<SEP>"  # we will use this to separate the client name & message
 
 cryptor = RSACryptor(1)
@@ -55,18 +60,18 @@ except ConnectionResetError as e:
 
 
 s.send(json.dumps({
-    "url": "authorisation",
-    "authentification_check": False,
+    "url": "registration",
+    # "authentification_check": False,
     "authentification_token": "d3a5f6cb-01a8-4bff-b076-64550ff85921",
-    "authorization_check": False,
+    # "authorization_check": False,
     "authorization_data": ["user1", "password1"],
-    # "registration_data": {
-    #     "username": "useryw",
-    #     "password": "password3",
-    #     "first_name": "first_name3",
-    #     "last_name": "last_name3",
-    #     "email": "flamehst@mail.ru"
-    # }
+    "registration_data": {
+        "username": "usery3333w",
+        "password": "password3",
+        "first_name": "first_name3",
+        "last_name": "last_name3",
+        "email": "myvideoboxdsa@gmail.com"
+    }
 }).encode())
 print("sent")
 m = s.recv(2048).decode()
@@ -76,76 +81,39 @@ mess = json.loads(str(m))
 print(mess)
 if mess['auth_success']:
     print(mess['AuthenticationUser'])
-else:
-    print("failed")
-    s.close()
 
-def listen_for_messages():
+    # make a thread that listens for messages to this client & print them
+    t = Thread(target=listen_for_messages)
+    # make the thread daemon so it ends whenever the main thread ends
+    t.daemon = True
+    # start the thread
+    t.start()
+
     while True:
 
-        message = s.recv(2048).decode()
-        {
-            'sender': 'client',  # 'sender':'server'
-            'keys': True,
-            'data': {'message': 'wadawd', 'username': 'user1'}  # dawdawdwdawdawdawdawdw
-        }
+        to_send = input('message')
+
         # database check if user exist
         # check keys
         # if keys ok:
         #   send message
         # else:
         #   renew keys
-        #database
-        if not message:
-            print("closed")
+        if to_send == '':
+            to_send = '1'
+        if to_send.lower() == 'q':
+            s.close()
             break
-        print("\n" + message)
+        username = input('username')
+        message = {}
+
+        s.send(to_send.encode())
+else:
+    print("failed")
+    s.close()
 
 
-# make a thread that listens for messages to this client & print them
-t = Thread(target=listen_for_messages)
-# make the thread daemon so it ends whenever the main thread ends
-t.daemon = True
-# start the thread
-t.start()
 
-while True:
-    # input message we want to send to the server
-    to_send = input()
-    #database check if user exist
-    #check keys
-    # if keys ok:
-    #   send message
-    #else:
-    #   renew keys
-    if to_send == '':
-        to_send = '1'
-    if to_send.lower() == 'q':
-        s.close()
-        break
-    # username = input('username')
-    print()
-    # try:
-    #     to_send = int(to_send)
-    #     if to_send == 1:
-    #         s.send("dawdaw daw")
-    #     elif to_send == 2:
-    #         with open("C:/Users/flame/Desktop/students/",'rb') as f:
-    #
-    #
-    #     elif to_send == 3:
-    #         pass
-    #     else:
-    #         pass
-    #
-    # except Exception as e:
-    #     print(to_send)
-    #     # a way to exit the program
-    #     # add the datetime, name & the color of the sender
-    #     date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    #     to_send = f"{client_color}[{date_now}]{separator_token}{to_send}"
-    #     # finally, send the message
-    s.send(to_send.encode())
 
 # close the socket
 s.close()
