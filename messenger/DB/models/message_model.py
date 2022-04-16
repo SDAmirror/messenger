@@ -6,9 +6,9 @@ class Message:
         self.send_time = send_time
 
 class MessageInfo(Message):
-    def __init__(self,id, content, send_date, send_time,sender,reciver,sent = False):
+    def __init__(self,id, content, send_date, send_time,sender,receiver,sent = False):
         self.__class__.__name__ = "MessageInfo"
         self.sender = sender
-        self.reciver = reciver
+        self.receiver = receiver
         self.sent = sent
         super().__init__(id, content, send_date, send_time,)

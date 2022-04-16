@@ -10,8 +10,8 @@ class MessageSchema:
     def __init__(self):
         self.db = db
 
-    def insert_message(self,message):
-        message = MessageInfo()
+    def insert_message(self,message,logger):
+
         sql1 = "insert into messages values(%s,%s,%s,%s)"
         sql2 = "insert into message_info values(%s,%s,%s,%s)"
         sql =  "insert into message values(%s,%s,%s,%s,%s,%s,%s)"
@@ -20,8 +20,9 @@ class MessageSchema:
             con = self.db.get_connection()
 
             try:
+                psycopg2.extras.register_uuid()
                 cur = con.cursor()
-                cur.execute(sql,(message.id,message.content,message.send_date,message.send_time,message.sender,message.reciver,message.sent))
+                cur.execute(sql,(message.id,message.content,message.send_date,message.send_time,message.sender,message.receiver,message.sent))
                 # id = str(uuid.uuid4())
                 # cur.execute(sql1, (message.id, message.content, message.send_date,message.send_time))
                 # # con.commit()

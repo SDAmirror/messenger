@@ -8,16 +8,16 @@ class Message_Recirver:
         self.db = None
 
     def recieve_message(self, id, message):
-        # return self.cryptor.decrypt(message)
-        return message
+        return self.cryptor.decrypt(message)
+
+        # return message
 
 class Message_Sender:
     def __init__(self, cryptor=None):
         self.cryptor = cryptor
 
     def send_message(self, id, message):
-        # return self.cryptor.encrypt(message)
-        return message
+        return self.cryptor.encrypt(message)
 
 
 class Message_Processor:

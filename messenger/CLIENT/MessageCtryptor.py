@@ -20,18 +20,32 @@ class RSACryptor:
             return {'key':pub,'errors':[]}
 
     def decrypt(self,message):
-        key = self.load_Private_key()
+        ress = self.load_Private_key()
 
         try:
-            message = rsa.decrypt(message, key)
+            m = ''
+            for i in range(0, len(message), 128):
+                m += rsa.decrypt(message[i:i + 128], ress['key']).decode()
+            return m
         except Exception as e:
             print(e)
         return message
 
     def encrypt(self,message):
         ress = self.load_server_Public_key()
+        key = ress['key']
         try:
-            message = rsa.encrypt(message,ress['key'])
+            l = len(message)
+
+            if l % 64 != 0:
+                message += ' ' * (l % 64)
+            temp = []
+            for i in range(0, len(message), 64):
+                temp.append(rsa.encrypt(message[i:i + 64].encode(), key))
+
+            return b''.join(temp)
+
+
         except Exception as e:
             print(e)
         return message

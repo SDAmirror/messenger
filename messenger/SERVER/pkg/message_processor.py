@@ -1,19 +1,26 @@
+import json
+import uuid
+
 from DB.models.message_model import MessageInfo
 from DB.schemas.message_shema import MessageSchema
 
-def message_rpepare(data,loger):
-    return data
-def message_processor(data,logger):
-    if 1: return 44124
-    schema = MessageSchema()
-    reciever = data['reciever']
-    body = data['body']
-    send_date = data['send_date']
-    send_time = data['send_time']
-    message = MessageInfo()
-    schema.insert_message(message,logger)
+def message_rpepare(data,username,loger):
+    try:
+        reciever = data['reciever']
+        body = data['body']
+        send_date = data['send_date']
+        send_time = data['send_time']
+        id = uuid.uuid4()
+        message = MessageInfo(id, body, send_date, send_time, username, reciever)
+        return {'message': message, 'errors': []}
+    except Exception as e:
+        return {'message': None, 'errors': [e]}
 
-    return 44124
+def message_processor(message,logger):
+
+    schema = MessageSchema()
+
+    return schema.insert_message(message,logger)
 
 
 class Message_Recirver:
@@ -21,8 +28,9 @@ class Message_Recirver:
         self.cryptor = cryptor
 
     def recieve_message(self, id, message):
-        # return self.cryptor.decrypt(message)
-        return message
+         return self.cryptor.decrypt(message)
+
+
 
 
 class Message_Sender:
@@ -30,8 +38,9 @@ class Message_Sender:
         self.cryptor = cryptor
 
     def send_message(self, id, message):
-        # return self.cryptor.encrypt(message)
-        return message
+
+        return self.cryptor.encrypt(message)
+        # return message
 
 
 class Message_Processor:

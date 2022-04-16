@@ -1,5 +1,7 @@
+import datetime
 import socket
 import ssl
+import time
 from threading import Thread
 import json
 
@@ -10,6 +12,7 @@ def listen_for_messages():
     while True:
 
         message = s.recv(2048).decode()
+        # message = message_receiver.recieve_message(1,message)
         {
             'sender': 'client',  # 'sender':'server'
             'keys': True,
@@ -51,16 +54,16 @@ except ConnectionResetError as e:
     print(f"client {id} disconnected")
     s.close()
 try:
-    key = message_sender.send_message(1,cryptor.load_Public_key()['key'].save_pkcs1().decode('utf-8'))
-    s.send(key.encode())
+    key = message_sender.send_message(1,cryptor.load_Public_key()['key'].save_pkcs1())
+    s.send(key)
 except ConnectionResetError as e:
     print(f"client {id} disconnected")
     s.close()
 
 
 
-s.send(json.dumps({
-    "url": "registration",
+s.send(message_sender.send_message(1,json.dumps({
+    "url": "authorisation",
     # "authentification_check": False,
     "authentification_token": "d3a5f6cb-01a8-4bff-b076-64550ff85921",
     # "authorization_check": False,
@@ -72,9 +75,10 @@ s.send(json.dumps({
         "last_name": "last_name3",
         "email": "myvideoboxdsa@gmail.com"
     }
-}).encode())
+})))
 print("sent")
-m = s.recv(2048).decode()
+m = s.recv(2048)
+m = message_receiver.recieve_message(1, m)
 
 print(m, 'recived')
 mess = json.loads(str(m))
@@ -105,9 +109,13 @@ if mess['auth_success']:
             s.close()
             break
         username = input('username')
-        message = {}
+        message = {'reciever':username, 'body': to_send, 'send_date': str(datetime.date.today()),'send_time':datetime.datetime.now().strftime("%H:%M:%S") }
 
-        s.send(to_send.encode())
+
+
+
+        # s.send(message_sender.send_message(1,json.dumps(message)))
+        s.send(json.dumps(message).encode())
 else:
     print("failed")
     s.close()

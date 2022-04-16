@@ -13,7 +13,7 @@ from collections import deque
 from select import select
 from pkg.MessageCtryptor import RSACryptor
 from logger import Logging
-import dill
+from DB.models.message_model import MessageInfo
 
 __basedir__ = os.path.dirname(os.path.realpath(__file__))
 print(os.path.dirname(os.path.realpath(__file__)))
@@ -94,6 +94,8 @@ def client_handler(client, id):
     cryptor = RSACryptor(id)
     cryptor.generate_RSA_keys()
     user = None
+    message_sender = message_processor.Message_Sender(cryptor)
+    message_receiver = message_processor.Message_Recirver(cryptor)
     try:
         ress = cryptor.load_Public_key()
         if ress['key']==None:
@@ -110,22 +112,21 @@ def client_handler(client, id):
 
     try:
         yield 'recv',client
-        public_key = client.recv(2048).decode()
+        public_key = client.recv(2048)
 
-        key = cryptor.decrypt(public_key)
+        key = message_receiver.recieve_message(id,public_key)
         cryptor.set_client_public_key(public_key)
     except ConnectionResetError as e:
         print(f"client {id} disconnected",e)
         client.close()
         return
 
-    message_sender = message_processor.Message_Sender(cryptor)
-    message_receiver = message_processor.Message_Recirver(cryptor)
+
     # con_procc = connection_processor.Connection_Processor(id,cryptor,logger)
     print('server')
     yield 'recv', client
-    message = client.recv(2048).decode()
-    message = message_receiver.recieve_message(id, str(message))
+    message = client.recv(2048)
+    message = message_receiver.recieve_message(id, message)
     print(message)
     try:
         message = json_loader(message)
@@ -148,8 +149,30 @@ def client_handler(client, id):
     procedure = False
     if message['url'] == 'authentication':
         fn = con_procc.user_authentication
+        future = pool.submit(fn, id, cryptor, logger, message)
+        yield 'future', future
+        ress = future.result()
+        print(ress)
+
+        connectionSuccessFlag = ress['flag']
+
+        yield 'send', client
+        resp = message_sender.send_message(id, ress['responce'])
+        client.send(resp)
+        user = ress['user']
     elif message['url'] == 'authorisation':
         fn = con_procc.user_authorisation
+        future = pool.submit(fn, id, message_sender, logger, message)
+        yield 'future', future
+        ress = future.result()
+        print(ress)
+
+        connectionSuccessFlag = ress['flag']
+
+        yield 'send', client
+        resp = message_sender.send_message(id, ress['responce'])
+        client.send(resp)
+        user = ress['user']
     elif message['url'] == 'registration':
         procedure = True
         fn = con_procc.user_registration_part1
@@ -211,14 +234,14 @@ def client_handler(client, id):
                     connectionSuccessFlag = False
             else:
                 response_model = message_sender.send_message(id,json.dumps({"message": "registration failed","auth_success": False}))
-                client.send(response_model.encode())
+                client.send(response_model)
         else:
-            client.send(ress['response'].encode())
+            client.send(ress['response'])
             client.close()
             return
 
 
-    if not procedure:
+
         future = pool.submit(fn, id, cryptor, logger, message)
         yield 'future', future
         ress = future.result()
@@ -226,15 +249,16 @@ def client_handler(client, id):
 
         connectionSuccessFlag = ress['flag']
 
-        yield 'send',client
         resp = message_sender.send_message(id,ress['responce'])
-        client.send(resp.encode())
+        yield 'send',client
+        client.send(resp)
         user = ress['user']
-  
+
     print('connect flag server ' ,connectionSuccessFlag)
     if not connectionSuccessFlag:
         active_clients.pop(id)
         client.close()
+        cryptor.delete_RSA_keys()
         return
 
     active_users[user.username] = id
@@ -243,6 +267,7 @@ def client_handler(client, id):
         try:
             yield 'recv', client
             message = client.recv(2048).decode()
+            # message = message_receiver.recieve_message(id,message)
             try:
                 message = json_loader(message)
             except Exception as e:
@@ -250,18 +275,37 @@ def client_handler(client, id):
                 #notify client that not sent
                 continue
             print(message)
-
-            future = pool.submit(message_processor.message_processor, message,logger)
+            future = pool.submit(message_processor.message_rpepare, message,user.username, logger)
             yield 'future', future
-            result = future.result()
+            ress = future.result()
+            if ress['message'] != None:
+                message = ress['message']
+                if message.receiver in (active_users.keys()):
+                    try:
+                        message.id = str(message.id)
+                        yield 'send',client
+                        active_clients[active_users[message.receiver]].send(json.dumps({'message':message.__dict__}).encode())
+                        message.sent = True
+                    except Exception as e:
+                        print(e,'not sent to {}'.format(message.receiver))
 
-            resp = str(result).encode()
+                future = pool.submit(message_processor.message_processor, message,logger)
+                yield 'future', future
+                ress = future.result()
 
-            yield 'send', client
+                if ress['created']:
+                    # response_model = message_sender.send_message(id,json.dumps({'saved':True,'sent': message.sent}))
+                    response_model = json.dumps({'saved':True,'sent': message.sent})
+                else:
+                    # response_model = message_sender.send_message(id, json.dumps({'saved': False, 'sent': message.sent}))
+                    response_model = json.dumps({'saved': False, 'sent': message.sent})
+
             try:
-                client.send(resp)
+                yield 'send', client
+                client.send(response_model.encode())
             except Exception as e:
                 print('client disconnected', e)
+                cryptor.delete_RSA_keys()
                 client.close()
                 break
 
@@ -269,17 +313,22 @@ def client_handler(client, id):
             print(f'con error{e}')
             print(f"client {id} disconnected")
             client.close()
+            cryptor.delete_RSA_keys()
             break
         except ConnectionResetError as e:
             print(f'con error{e}')
             print(f"client {id} disconnected")
             client.close()
+            cryptor.delete_RSA_keys()
             break
         except Exception as e:
             print(f'con error{e}')
             print(f"client {id} disconnected")
             client.close()
+            cryptor.delete_RSA_keys()
             break
+
+
 
     print('closed')
 
@@ -288,7 +337,6 @@ def base_server(address):
     logger.log(logging.INFO,'creation of base server')
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     context.load_cert_chain('server.crt', 'server.key', password='firstkey')
-
     ssock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     ssock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     ssock.bind(address)
@@ -300,7 +348,7 @@ def base_server(address):
             yield 'recv', sock
             client, addr = sock.accept()
             id = uuid.uuid4()
-            id = uuid.UUID('4913d052-26ab-47d3-b3fe-968be8f52980')
+            # id = uuid.UUID('4913d052-26ab-47d3-b3fe-968be8f52980')
             print(f"[+] {client} connected with id {id}")
             active_clients[id] = client
             tasks.append(client_handler(client, id))

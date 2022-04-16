@@ -133,7 +133,8 @@ def user_authentication(id, cryptor, logger,data):
         response_model = json.dumps({"message": "authentication failed", "auth_success": False})
 
     return {'responce': response_model, 'errors': errors, 'flag': flag,'user':user}
-def user_authorisation(id, cryptor, logger,data):
+def user_authorisation(id, message_sender, logger,data):
+
     user = None
     userSchema = UserSchema()
     flag = False

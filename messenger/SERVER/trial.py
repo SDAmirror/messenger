@@ -1,81 +1,37 @@
-def user_registration_part1(id, cryptor, logger,data):
-    userSchema = UserSchema()
-    flag = False
-    errors = []
-    response_model = ''
-    user = CreateUser()
-    user.username = data["registration_data"]["username"]
-    user.password = data["registration_data"]["password"]
-    user.first_name = data["registration_data"]["first_name"]
-    user.last_name = data["registration_data"]["last_name"]
-    user.email = data["registration_data"]["email"]
-    user.is_active = True
+import json
+import time
 
-    if not email_validation(user.email):
-        response_model = message_sender.send_message(json.dumps({"message": "registration failed: wrong email format", "auth_success": False}))
+import rsa
 
+from pkg.MessageCtryptor import RSACryptor
+from pkg.message_processor import Message_Sender
+from pkg.message_processor import Message_Recirver
 
-    checkUser = userSchema.getUserByUsername(user.username)
-
-    if checkUser['user'] == None and len(checkUser['errors']) == 0:
-        validation_res = False
-        validator = Validator()
-        code_send_attempts = 3
-        while code_send_attempts > 0:
-            code_generated = validator.generate_code()
-            ress = validator.send_code(user.email, code_generated)
-            if len(ress['errors']) == 0:
-                pass
-            else:
-                response_model = message_sender.send_message(json.dumps({"message": "Validation code error", "auth_success": False}))
-            attempts = 3
-
-            while attempts > 0:
-                try:
-                    message = client.recv(1024).decode()
-                    message = message_recirver.recieve_message(id, str(message))
-                except Exception as e:
-                    print(f"error: {e}")
+cryptor = RSACryptor(2)
+cryptor.generate_RSA_keys()
+sender = Message_Sender(cryptor)
+reciv = Message_Recirver(cryptor)
+servpub = cryptor.load_Public_key()
 
 
-                try:
-                    code_validation_data = json.loads(message)
-                except:
-                    print("error json load")
-                    response_model = message_sender.send_message(json.dumps({"message": "data transmition failure packets are damaged", "auth_success": False}))
-                code_received = code_validation_data['validation_code']
-
-                # validator.valid(user, code, coderecieved)  (TRUE/FALSE) {result:TRUE/FALSE,errors=[]}
-
-                validation_res = validator.validate(user, code_generated, code_received)
-                if validation_res:
-                    break
-                attempts -= 1
-
-            code_send_attempts -= 1
-            if validation_res:
-                break
-        if validation_res == True:
-
-            ress = userSchema.createNewUser(user)
-            if 'username_taken' in ress['errors']:
-                response_model = message_sender.send_message(json.dumps({"message": "registration failed: username already taken", "auth_success": False}))
-            if ress['created']:
-                usertoken = str(createAuthToken(user.username))
-                authUser = AuthenticatedUser(user.__dict__, usertoken)
-                # try catch
-                flag = newAuthorisation(user.username, usertoken, '', '', '')
-                if not flag:
-                    response_model = message_sender.send_message(json.dumps({"AuthenticationUser": authUser.__dict__, "auth_success": False}))
-                else:
-                    # TODO registration logs
-                    response_model = message_sender.send_message(json.dumps({"AuthenticationUser": authUser.__dict__, "auth_success": True}))
-                    flag_processor_success = True
+pub,priv = rsa.newkeys(1024)
+cryptor.set_client_public_key(pub.save_pkcs1())
+t64 = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
+t62 = json.dumps({'non':None})
 
 
-            else:
-                response_model = message_sender.send_message(json.dumps({"message": "registration failed", "auth_success": False}))
-        else:
-            response_model = message_sender.send_message(json.dumps({"message": "registration failed", "auth_success": False}))
-    else:
-        response_model = message_sender.send_message(json.dumps({"message": "registration failed", "auth_success": False}))
+
+c = sender.send_message(2,t64)
+
+ts = time.time()
+m=''
+
+# print(te
+
+
+
+
+
+te = time.time()
+print(te-ts,'\n',c)
+
