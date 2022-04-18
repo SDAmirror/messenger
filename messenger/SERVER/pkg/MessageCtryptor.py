@@ -15,8 +15,8 @@ class RSACryptor:
             pub = rsa.PublicKey.load_pkcs1(publicfile.read())
             return {'key':pub,'errors':[]}
 
-    def load_client_Public_key(self):
-        with open(f'{self.path}client_public{self.id}.pem', 'rb') as cl_publicfile:
+    def load_client_Public_key(self,id):
+        with open(f'{self.path}client_public{id}.pem', 'rb') as cl_publicfile:
             pub = rsa.PublicKey.load_pkcs1(cl_publicfile.read())
             return {'key':pub,'errors':[]}
         return {'key': None, 'errors': ['error']}
@@ -32,8 +32,8 @@ class RSACryptor:
             print(e)
         return message
 
-    def encrypt(self,message):
-        ress = self.load_client_Public_key()
+    def encrypt(self,id,message):
+        ress = self.load_client_Public_key(id)
         key = ress['key']
         try:
             l = len(message)
@@ -42,7 +42,7 @@ class RSACryptor:
                 message += ' ' * (l % 64)
             temp = []
             for i in range(0, len(message), 64):
-                temp.append(rsa.encrypt(message[i:i + 64].encode(),key))
+                temp.append(rsa.encrypt(message[i:i + 64].encode('ISO-8859-1'),key))
 
             return b''.join(temp)
 

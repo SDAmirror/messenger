@@ -3,7 +3,6 @@ import uuid
 
 from DB.models.message_model import MessageInfo
 from DB.schemas.message_shema import MessageSchema
-
 def message_rpepare(data,username,loger):
     try:
         reciever = data['reciever']
@@ -39,7 +38,7 @@ class Message_Sender:
 
     def send_message(self, id, message):
 
-        return self.cryptor.encrypt(message)
+        return self.cryptor.encrypt(id,message)
         # return message
 
 

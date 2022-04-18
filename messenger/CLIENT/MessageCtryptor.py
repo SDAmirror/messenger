@@ -41,7 +41,7 @@ class RSACryptor:
                 message += ' ' * (l % 64)
             temp = []
             for i in range(0, len(message), 64):
-                temp.append(rsa.encrypt(message[i:i + 64].encode(), key))
+                temp.append(rsa.encrypt(message[i:i + 64].encode('ISO-8859-1'), key))
 
             return b''.join(temp)
 

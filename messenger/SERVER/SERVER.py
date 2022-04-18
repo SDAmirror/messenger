@@ -266,8 +266,8 @@ def client_handler(client, id):
     while True:
         try:
             yield 'recv', client
-            message = client.recv(2048).decode()
-            # message = message_receiver.recieve_message(id,message)
+            message = client.recv(2048)
+            message = message_receiver.recieve_message(id,message)
             try:
                 message = json_loader(message)
             except Exception as e:
@@ -281,10 +281,14 @@ def client_handler(client, id):
             if ress['message'] != None:
                 message = ress['message']
                 if message.receiver in (active_users.keys()):
+                    ress_id = active_users[message.receiver]
                     try:
                         message.id = str(message.id)
                         yield 'send',client
-                        active_clients[active_users[message.receiver]].send(json.dumps({'message':message.__dict__}).encode())
+                        message_to_send = json.dumps({'message':message.__dict__})
+                        active_clients[active_users[message.receiver]].send(message_sender.send_message(ress_id,message_to_send))
+
+                        # active_clients[active_users[message.receiver]].send(json.dumps({'message':message.__dict__}).encode())
                         message.sent = True
                     except Exception as e:
                         print(e,'not sent to {}'.format(message.receiver))
@@ -294,15 +298,15 @@ def client_handler(client, id):
                 ress = future.result()
 
                 if ress['created']:
-                    # response_model = message_sender.send_message(id,json.dumps({'saved':True,'sent': message.sent}))
                     response_model = json.dumps({'saved':True,'sent': message.sent})
                 else:
-                    # response_model = message_sender.send_message(id, json.dumps({'saved': False, 'sent': message.sent}))
                     response_model = json.dumps({'saved': False, 'sent': message.sent})
 
             try:
+                prep_message = message_sender.send_message(id,response_model)
                 yield 'send', client
-                client.send(response_model.encode())
+                client.send(prep_message)
+                # client.send(response_model.encode())
             except Exception as e:
                 print('client disconnected', e)
                 cryptor.delete_RSA_keys()
@@ -342,14 +346,13 @@ def base_server(address):
     ssock.bind(address)
     ssock.listen(5)
     with context.wrap_socket(ssock, server_side=True) as sock:
-        print('got')
-
         while True:
             yield 'recv', sock
             client, addr = sock.accept()
             id = uuid.uuid4()
             # id = uuid.UUID('4913d052-26ab-47d3-b3fe-968be8f52980')
             print(f"[+] {client} connected with id {id}")
+            logger.log(logging.INFO,"[+] {client} connected with id {id}")
             active_clients[id] = client
             tasks.append(client_handler(client, id))
 
@@ -357,12 +360,8 @@ def base_server(address):
 tasks.append(base_server(('localhost', 4430)))
 
 if __name__ == '__main__':
-    run()
-
-# postgresql cursor
-
-# 20000-50000
-
-# while online
-# cursor work
-#
+    try:
+        print("run")
+        run()
+    except KeyboardInterrupt as e:
+        print("keybord interupted",e)

@@ -11,8 +11,9 @@ from  MessageCtryptor import RSACryptor
 def listen_for_messages():
     while True:
 
-        message = s.recv(2048).decode()
-        # message = message_receiver.recieve_message(1,message)
+        # message = s.recv(2048).decode()
+        message = s.recv(2048)
+        message = message_receiver.recieve_message(1,message)
         {
             'sender': 'client',  # 'sender':'server'
             'keys': True,
@@ -30,7 +31,7 @@ def listen_for_messages():
         if not message:
             print("closed")
             break
-        print("\n" + message)
+        print(message)
 
 
 SERVER_HOST = "localhost"
@@ -45,7 +46,8 @@ message_receiver = message_processor.Message_Recirver(cryptor)
 
 s = ssl.wrap_socket(socket.socket())
 s.connect((SERVER_HOST, SERVER_PORT))
-
+# s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# s.connect((SERVER_HOST, SERVER_PORT))
 print("[+] Connected.")
 try:
     server_public_key = s.recv(2048).decode()
@@ -114,8 +116,8 @@ if mess['auth_success']:
 
 
 
-        # s.send(message_sender.send_message(1,json.dumps(message)))
-        s.send(json.dumps(message).encode())
+        s.send(message_sender.send_message(1,json.dumps(message)))
+        # s.send(json.dumps(message).encode())
 else:
     print("failed")
     s.close()
