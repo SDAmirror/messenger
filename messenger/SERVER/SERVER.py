@@ -13,7 +13,7 @@ from collections import deque
 from select import select
 from pkg.MessageCtryptor import RSACryptor
 from logger import Logging
-from DB.models.message_model import MessageInfo
+
 
 __basedir__ = os.path.dirname(os.path.realpath(__file__))
 print(os.path.dirname(os.path.realpath(__file__)))
@@ -33,6 +33,7 @@ send_wait = {}
 future_wait = {}
 
 future_notify, future_event = socket.socketpair()
+context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 
 
 def future_done(future):
@@ -43,7 +44,6 @@ def future_done(future):
 def future_monitor():
     while True:
         yield 'recv', future_event
-        # change
         future_event.recv(1024)
 
 
@@ -60,14 +60,14 @@ def run():
         while not any([tasks, recv_wait, send_wait]):
             pass
         while not tasks:
-            try:
-                can_recv, can_send, [] = select(recv_wait, send_wait, [])
-                for s in can_recv:
-                    tasks.append(recv_wait.pop(s))
-                for s in can_send:
-                    tasks.append(send_wait.pop(s))
-            except Exception as e:
-                print(e, 'len error qoq')
+            # try:
+            can_recv, can_send, [] = select(recv_wait, send_wait, [])
+            for s in can_recv:
+                tasks.append(recv_wait.pop(s))
+            for s in can_send:
+                tasks.append(send_wait.pop(s))
+            # except Exception as e:
+            #     print(e, 'len error qoq')
 
         try:
             task = tasks.pop()
@@ -113,8 +113,6 @@ def client_handler(client, id):
     try:
         yield 'recv',client
         public_key = client.recv(2048)
-
-        key = message_receiver.recieve_message(id,public_key)
         cryptor.set_client_public_key(public_key)
     except ConnectionResetError as e:
         print(f"client {id} disconnected",e)
@@ -124,27 +122,48 @@ def client_handler(client, id):
 
     # con_procc = connection_processor.Connection_Processor(id,cryptor,logger)
     print('server')
-    yield 'recv', client
-    message = client.recv(2048)
-    message = message_receiver.recieve_message(id, message)
-    print(message)
-    try:
-        message = json_loader(message)
+    # yield 'recv', client
+    # message = client.recv(2048)
+    # message = message_receiver.recieve_message(id, message)
+    # print(message)
+    # try:
+    #     message = json_loader(message)
+    # except json.JSONDecodeError as e:
+    #     print(e, 'auth data recieve error')
+    # except Exception as e:
+    #     print(e, 'loader error')
+    while True:
+        try:
+            yield 'recv', client
+            message = client.recv(2048)
+            message = message_receiver.recieve_message(id, message)
+            print(message)
+            try:
+                message = json_loader(message)
+                try:
+                    if 'auth_check' in list(message.keys()):
+                        client.send(message_sender.send_message(id,json.dumps({"auth_data_exchange":True,'error':0})))
+                        break
+                    else:
+                        client.send(message_sender.send_message(id,json.dumps({"auth_data_exchange":False,'error':50401})))
+                except ConnectionResetError as e:
+                    print('error asc', e)
+                    print(f"client {id} disconnected")
+                    client.close()
+                    return
 
-        # break
-    except json.JSONDecodeError as e:
-        print(e, 'auth data recieve error')
-    except Exception as e:
-        print(e, 'loader error')
-    # while True:
-    #     try:
-    #
-    #     except ConnectionResetError as e:
-    #         print(f"client {id} disconnected")
-    #         client.close()
-    #         return
-    #     except Exception as e:
-    #         print('error asc',e)
+            except json.JSONDecodeError as e:
+                print(e, 'auth data recieve error')
+        except ConnectionResetError as e:
+            print('error asc', e)
+            print(f"client {id} disconnected")
+            client.close()
+            return
+        except Exception as e:
+            print('error asc', e)
+            print(f"client {id} disconnected")
+            client.close()
+            return
 
     procedure = False
     if message['url'] == 'authentication':
@@ -152,7 +171,7 @@ def client_handler(client, id):
         future = pool.submit(fn, id, cryptor, logger, message)
         yield 'future', future
         ress = future.result()
-        print(ress)
+
 
         connectionSuccessFlag = ress['flag']
 
@@ -160,77 +179,79 @@ def client_handler(client, id):
         resp = message_sender.send_message(id, ress['responce'])
         client.send(resp)
         user = ress['user']
-    elif message['url'] == 'authorisation':
+    elif message['url'] == 'authorization':
         fn = con_procc.user_authorisation
         future = pool.submit(fn, id, message_sender, logger, message)
         yield 'future', future
         ress = future.result()
-        print(ress)
 
         connectionSuccessFlag = ress['flag']
-
-        yield 'send', client
         resp = message_sender.send_message(id, ress['responce'])
+        yield 'send', client
         client.send(resp)
         user = ress['user']
     elif message['url'] == 'registration':
         procedure = True
         fn = con_procc.user_registration_part1
-        future = pool.submit(fn, id, cryptor, logger, message)
+        future = pool.submit(fn, id, message_sender, logger, message)
         yield 'future', future
         ress = future.result()
         if ress['success']:
             user = ress['user']
             validation_res = False
             code_send_attempts = 3
-            # while code_send_attempts > 0:
-            #     fn = con_procc.user_registration_part2
-            #     future = pool.submit(fn, id, cryptor, logger, user)
-            #     yield 'future', future
-            #     ress = future.result()
-            #     if ress['success']:
-            #         code = ress['code']
-            #         attempts = 3
-            #
-            #         while attempts > 0:
-            #             try:
-            #                 message = client.recv(2048).decode()
-            #
-            #             except Exception as e:
-            #                 print(f"error: {e}")
-            #
-            #             fn = con_procc.user_registration_part3
-            #             future = pool.submit(fn,id, cryptor, logger, user,code,message)
-            #             ress = future.result()
-            #             if ress['success']:
-            #                 if ress['validation']:
-            #                     validation_res = True
-            #                     break
-            #                 else:
-            #                     response = message_sender.send_message(id,f"invalid code, you have {attempts-1} more attemps")
-            #                     client.send(response.encode())
-            #             else:
-            #                 client.send(ress['response'].encode())
-            #
-            #             attempts -= 1
-            #
-            #         code_send_attempts -= 1
-            #         if validation_res:
-            #             break
-            #         else:
-            #             response = message_sender.send_message(id,f"invalid code, we sent new code to your email")
-            #             client.send(response.encode())
-            # if validation_res:
-            if True:
+            while code_send_attempts > 0:
+                # fn = con_procc.user_registration_part2
+                # future = pool.submit(fn, id, cryptor, logger, user,context)
+                # yield 'future', future
+                # ress = future.result()
+                ress = con_procc.user_registration_part2(id, message_sender, logger, ress['user'],context)
+
+                if ress['success']:
+                    code = ress['code']
+                    attempts = 3
+                    print(code)
+                    while attempts > 0:
+                        try:
+                            yield 'recv',client
+                            message = client.recv(2048)
+                            message = message_receiver.recieve_message(id,message)
+                            print(message)
+                        except Exception as e:
+                            print(f"error: {e}")
+
+                        fn = con_procc.user_registration_part3
+                        future = pool.submit(fn,id, message_sender, logger, user,code,message)
+                        ress = future.result()
+                        if ress['success']:
+                            if ress['validation']:
+                                validation_res = True
+                                break
+                            else:
+                                response = message_sender.send_message(id,f"invalid code, you have {attempts-1} more attemps")
+                                client.send(response)
+                        else:
+                            client.send(message_sender.send_message(id,"smth wrong"))
+
+                        attempts -= 1
+
+                    code_send_attempts -= 1
+                    if validation_res:
+                        break
+                    else:
+                        response = message_sender.send_message(id,f"invalid code, we sent new code to your email")
+                        client.send(response)
+            if validation_res:
+            # if True:
                 fn = con_procc.user_registration_part4
-                future = pool.submit(fn, id, cryptor, logger, user)
+                future = pool.submit(fn, id, message_sender, logger, user)
                 yield 'future', future
                 ress = future.result()
                 if ress['success']:
                     connectionSuccessFlag = True
-                    client.send(ress['response'].encode())
+                    client.send(ress['response'])
                 else:
-                    client.send(ress['response'].encode())
+                    client.send(ress['response'])
                     connectionSuccessFlag = False
             else:
                 response_model = message_sender.send_message(id,json.dumps({"message": "registration failed","auth_success": False}))
@@ -240,19 +261,12 @@ def client_handler(client, id):
             client.close()
             return
 
+        connectionSuccessFlag = ress['success']
 
-
-        future = pool.submit(fn, id, cryptor, logger, message)
-        yield 'future', future
-        ress = future.result()
-        print(ress)
-
-        connectionSuccessFlag = ress['flag']
-
-        resp = message_sender.send_message(id,ress['responce'])
+        resp = message_sender.send_message(id,ress['response'])
         yield 'send',client
         client.send(resp)
-        user = ress['user']
+        # user = ress['user']
 
     print('connect flag server ' ,connectionSuccessFlag)
     if not connectionSuccessFlag:
@@ -262,6 +276,18 @@ def client_handler(client, id):
         return
 
     active_users[user.username] = id
+    future = pool.submit(message_processor.send_unsent_messages, user.username,logger)
+    yield 'future', future
+    ress = future.result()
+    for message in ress['messages']:
+        try:
+            m = message_sender.send_message(id, json.dumps(message.__dict__))
+            yield 'send', client
+            client.send(m)
+
+            message_processor.updateSent(message.id,logger)
+        except Exception as e:
+            print('unsent message not sent',e)
 
     while True:
         try:
@@ -270,10 +296,17 @@ def client_handler(client, id):
             message = message_receiver.recieve_message(id,message)
             try:
                 message = json_loader(message)
+            except ConnectionAbortedError as e:
+                print(f'con error{e}')
+                print(f"client {id} disconnected")
+                client.close()
+                cryptor.delete_RSA_keys()
+                break
             except Exception as e:
                 print(e,'message load error')
-                #notify client that not sent
-                continue
+                client.close()
+                cryptor.delete_RSA_keys()
+                break
             print(message)
             future = pool.submit(message_processor.message_rpepare, message,user.username, logger)
             yield 'future', future
@@ -285,12 +318,14 @@ def client_handler(client, id):
                     try:
                         message.id = str(message.id)
                         yield 'send',client
-                        message_to_send = json.dumps({'message':message.__dict__})
+                        message.sent = True
+                        message_to_send = json.dumps({'url':"message",'message':message.__dict__})
                         active_clients[active_users[message.receiver]].send(message_sender.send_message(ress_id,message_to_send))
 
                         # active_clients[active_users[message.receiver]].send(json.dumps({'message':message.__dict__}).encode())
-                        message.sent = True
+
                     except Exception as e:
+                        message.sent = False
                         print(e,'not sent to {}'.format(message.receiver))
 
                 future = pool.submit(message_processor.message_processor, message,logger)
@@ -298,14 +333,15 @@ def client_handler(client, id):
                 ress = future.result()
 
                 if ress['created']:
-                    response_model = json.dumps({'saved':True,'sent': message.sent})
+                    response_model = json.dumps({'receiver':message.receiver,'url':"status",'saved':True,'sent': message.sent})
                 else:
-                    response_model = json.dumps({'saved': False, 'sent': message.sent})
+                    response_model = json.dumps({'receiver':message.receiver,'url':"status",'saved': False, 'sent': message.sent})
 
             try:
                 prep_message = message_sender.send_message(id,response_model)
                 yield 'send', client
                 client.send(prep_message)
+
                 # client.send(response_model.encode())
             except Exception as e:
                 print('client disconnected', e)
@@ -331,15 +367,12 @@ def client_handler(client, id):
             client.close()
             cryptor.delete_RSA_keys()
             break
-
-
-
     print('closed')
-
+    return
 
 def base_server(address):
     logger.log(logging.INFO,'creation of base server')
-    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    # context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     context.load_cert_chain('server.crt', 'server.key', password='firstkey')
     ssock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     ssock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -357,6 +390,8 @@ def base_server(address):
             tasks.append(client_handler(client, id))
 
 
+# tasks.append(base_server(('192.168.76.217', 4430)))
+# tasks.append(base_server(('172.20.10.8', 4430)))
 tasks.append(base_server(('localhost', 4430)))
 
 if __name__ == '__main__':
@@ -365,3 +400,5 @@ if __name__ == '__main__':
         run()
     except KeyboardInterrupt as e:
         print("keybord interupted",e)
+    except Exception as e:
+        print(e,'run error')

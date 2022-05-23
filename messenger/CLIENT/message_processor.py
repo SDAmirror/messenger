@@ -8,7 +8,7 @@ class Message_Recirver:
         self.db = None
 
     def recieve_message(self, id, message):
-        return self.cryptor.decrypt(message)
+        return self.cryptor.decrypt(message).rstrip()
 
         # return message
 

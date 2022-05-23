@@ -8,23 +8,22 @@ class Validator:
         code = str(randint(1000000, 9999999))
         return code
 
-    def send_code(self, receiver_email, code):
+    def send_code(self, receiver_email, code,context1=None):
         result = {'result': {}, 'errors': []}
         port = 465  # For SSL
         smtp_server = "smtp.gmail.com"
-        password = "doripass568word"
-        # sender = "myvideoboxdsa@gmail.com"
+        # password = "doripass568word"
+        sender = "myvideoboxdsa@gmail.com"
         # receiver_email = "flamehst@mail.ru"
-        # password = 'ziqzxjotlibxpkfq'
-        sender = "amanbolganovadaria@gmail.com"
+        password = 'ziqzxjotlibxpkfq'
+        # sender = "amanbolganovadaria@gmail.com"
 
-        message = """Check:
-        Subject: SMTP e-mail test
-        YOUR CODE is """ + code
-
+        message = "\Check:\nSubject: SMTP e-mail \nYOUR CODE is {}".format(str(code))
+        print(message)
         # Create a secure SSL context
         try:
             context = ssl.create_default_context()
+
         except Exception as e:
             print(e)
             result['errors'] = "SSL context creation error"
@@ -39,6 +38,7 @@ class Validator:
             # Send email here
             try:
                 server.sendmail(sender, receiver_email, message)
+                print('code sent')
             except Exception as e:
                 result['errors'] = "Server error: couldn't send code"
 

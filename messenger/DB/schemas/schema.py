@@ -14,7 +14,7 @@ class UserSchema:
         try:
             con = self.db.get_connection()
             cur = con.cursor()
-            cur.execute("insert into authentication_session() where username = %s and token=%s", (username, token))
+            cur.execute("insert into authentication_session() where username = %s and token=%s", (username, token,))
             rows = cur.fetchone()
             auth_flag = True
         except Exception as e:
@@ -30,7 +30,7 @@ class UserSchema:
             try:
 
                 cur = con.cursor()
-                cur.execute("select * from authentication_session where username = %s and token=%s", (username, token))
+                cur.execute("select * from authentication_session where username = %s and token=%s", (username, token,))
                 rows = cur.fetchone()
                 if len(rows) == 0:
                     auth_flag = False
@@ -76,8 +76,7 @@ class UserSchema:
             try:
                 user = CreateUser()
                 cur = con.cursor()
-                cur.execute("select * from user_base ub, user_profile up where username = %s and up.user_id = ub.id",
-                            (username,))
+                cur.execute("select * from user_base ub, user_profile up where username = %s and up.user_id = ub.id",(username,))
 
                 sizerow = cur.fetchone()
 
@@ -88,7 +87,7 @@ class UserSchema:
                     for col in cur.description:
                         row.update({str(col[0]): sizerow[c]})
                         c += 1
-                    user.id = row["id"]
+                    user.id = str( row["id"])
                     user.username = row["username"]
                     user.password = row["password"]
                     user.email = row["email"]
@@ -99,6 +98,7 @@ class UserSchema:
                 else:
                     return_block = {"user": None, "errors": []}
             except Exception as e:
+                print(e,'getByusername')
                 return_block = {"user": None, "errors": [e]}
             finally:
                 cur.close()
@@ -204,11 +204,11 @@ class UserSchema:
             try:
                 cur = con.cursor()
                 id = str(uuid.uuid4())
-                cur.execute(sql1,(id,user.username,user.password,user.email))
+                cur.execute(sql1,(id,user.username,user.password,user.email,))
                 # con.commit()
                 commited = True
                 try:
-                    cur.execute(sql2, (str(uuid.uuid4()),id, user.first_name, user.last_name, False))
+                    cur.execute(sql2, (str(uuid.uuid4()),id, user.first_name, user.last_name, False,))
                     con.commit()
                     commited = True
                 except psycopg2.IntegrityError as e:

@@ -145,13 +145,15 @@ def user_authorisation(id, message_sender, logger,data):
     ress = authorisation(username, password)
     if ress["user"] != None:
         user = ress['user']
+        print(user.__dict__)
         usertoken = str(createAuthToken(username))
-        authUser = AuthenticatedUser(ress["user"].__dict__, usertoken)
+        authUser = AuthenticatedUser(user.__dict__, usertoken)
         # try catch
         eflag = newAuthorisation(username, usertoken, '', '', '')
         if not eflag:
             resp = message_sender.send_message(id, json.dumps({"AuthenticationUser": authUser.__dict__, "auth_success": False}))
         else:
+            print(authUser.__dict__)
             resp = message_sender.send_message(id, json.dumps({"AuthenticationUser": authUser.__dict__, "auth_success": True}))
             flag = True
 
@@ -163,7 +165,7 @@ def user_authorisation(id, message_sender, logger,data):
         resp = message_sender.send_message(id, json.dumps({"AuthenticationUser": None, "auth_success": False}))
     return {'responce': resp, 'errors': errors, 'flag': flag,'user':user}
 
-def user_registration_part1(id, cryptor, logger,data):
+def user_registration_part1(id, message_sender, logger,data):
     userSchema = UserSchema()
     flag = False
     errors = []
@@ -186,33 +188,39 @@ def user_registration_part1(id, cryptor, logger,data):
     else:
         response_model = message_sender.send_message(id,json.dumps({"message": "registration failed: username taken", "auth_success": False}))
         return {'success':False,'response':response_model}
-def user_registration_part2(id, cryptor, logger,user):
+def user_registration_part2(id, message_sender, logger,user,context=None):
     validator = Validator()
     code_generated = validator.generate_code()
-    ress = validator.send_code(user.email, code_generated)
+    ress = validator.send_code(user.email, code_generated,context)
     if len(ress['errors']) == 0:
         return {'success':True,'code':code_generated}
     else:
         response_model = message_sender.send_message(id,json.dumps({"message": "Validation code error", "auth_success": False}))
         return {'success':False,'response':response_model}
 
-def user_registration_part3(id, cryptor, logger,user, code,message):
+def user_registration_part3(id, message_sender, logger,user, code,message):
     validator = Validator()
 
-    try:
-        message = message_recirver.recieve_message(id, str(message))
-        code_validation_data = json.loads(message)
-    except Exception as e:
-        print("error json load", e)
-        response_model = message_sender.send_message(id,json.dumps({"message": "data transmition failure packets are damaged", "auth_success": False}))
-        return {'success':False,'response':response_model}
-    code_received = code_validation_data['validation_code']
+    # try:
+    #     message = message_recirver.recieve_message(id, str(message))
+    #     code_validation_data = json.loads(message)
+    # except Exception as e:
+    #     print("error json load",
+    #           e,
+    #           type(e).__name__,  # TypeError
+    #           __file__,  # /tmp/example.py
+    #           e.__traceback__.tb_lineno  # 2
+    #           )
+    #     response_model = message_sender.send_message(id,json.dumps({"message": "data transmition failure packets are damaged", "auth_success": False}))
+    #     return {'success':False,'response':response_model}
+    # code_received = code_validation_data['validation_code']
+    code_received = message
 
     # validator.valid(user, code, coderecieved)  (TRUE/FALSE) {result:TRUE/FALSE,errors=[]}
 
     validation_res = validator.validate(user, code, code_received)
-    return {'success':False,'validation':validation_res}
-def user_registration_part4(id, cryptor, logger,user):
+    return {'success':True,'validation':validation_res}
+def user_registration_part4(id, message_sender, logger,user):
     userSchema = UserSchema()
     flag = False
     errors = []

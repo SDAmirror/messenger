@@ -1,8 +1,8 @@
-import json
 import uuid
-
 from DB.models.message_model import MessageInfo
 from DB.schemas.message_shema import MessageSchema
+
+
 def message_rpepare(data,username,loger):
     try:
         reciever = data['reciever']
@@ -14,7 +14,15 @@ def message_rpepare(data,username,loger):
         return {'message': message, 'errors': []}
     except Exception as e:
         return {'message': None, 'errors': [e]}
+def send_unsent_messages(username,logger):
+    schema = MessageSchema()
+    messages = schema.send_unsent_messages(username,logger)
 
+    return messages
+def updateSent(id,logger):
+    schema = MessageSchema()
+
+    return schema.updateSent(id, logger)
 def message_processor(message,logger):
 
     schema = MessageSchema()
@@ -27,11 +35,8 @@ class Message_Recirver:
         self.cryptor = cryptor
 
     def recieve_message(self, id, message):
-         return self.cryptor.decrypt(message)
-
-
-
-
+        m = self.cryptor.decrypt(message)
+        return m.rstrip()
 class Message_Sender:
     def __init__(self, cryptor=None):
         self.cryptor = cryptor

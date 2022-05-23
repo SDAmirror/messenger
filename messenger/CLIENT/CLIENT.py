@@ -4,9 +4,9 @@ import ssl
 import time
 from threading import Thread
 import json
-
 import message_processor
 from  MessageCtryptor import RSACryptor
+
 
 def listen_for_messages():
     while True:
@@ -34,9 +34,10 @@ def listen_for_messages():
         print(message)
 
 
+SERVER_HOST = "172.20.10.8"
 SERVER_HOST = "localhost"
+# SERVER_HOST = "192.168.76.217"
 SERVER_PORT = 4430
-separator_token = "<SEP>"  # we will use this to separate the client name & message
 
 cryptor = RSACryptor(1)
 cryptor.generate_RSA_keys()
@@ -46,8 +47,7 @@ message_receiver = message_processor.Message_Recirver(cryptor)
 
 s = ssl.wrap_socket(socket.socket())
 s.connect((SERVER_HOST, SERVER_PORT))
-# s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# s.connect((SERVER_HOST, SERVER_PORT))
+
 print("[+] Connected.")
 try:
     server_public_key = s.recv(2048).decode()
@@ -62,22 +62,44 @@ except ConnectionResetError as e:
     print(f"client {id} disconnected")
     s.close()
 
+cou = 3
+while True:
+    s.send(message_sender.send_message(1,json.dumps({
+        "auth_check":1,
+        "url": "authorization",
+        # "authentification_check": False,
+        "authentification_token": "d3a5f6cb-01a8-4bff-b076-64550ff85921",
+        # "authorization_check": False,
+        "authorization_data": ["user3", "password3"],
+        "registration_data": {
+            "username": "555666",
+            "password": "passwordww3",
+            "first_name": "first_name3",
+            "last_name": "last_name3",
+            # "email": "myvideoboxdsa@gmail.com"
+            "email": "d.sadykov@astanait.edu.kz"
+            # "email": "gulnur.kst@gmail.com"
+        }
+    })))
+    m = s.recv()
+    status = json.loads(message_receiver.recieve_message(1,m))
+    if status['auth_data_exchange']:
+        break
+    else:
+        cou -=1
+        if status['error']==50401:
+            print('data sent unsuccessful')
+#
+#
+# while True:
+#     code=input('code')
+#     if code == "q":break
+#     s.send(message_sender.send_message(1,code))
+#     print("sent")
+#     m = s.recv(2048)
+#     m = message_receiver.recieve_message(1, m)
+#     print(m)
 
-
-s.send(message_sender.send_message(1,json.dumps({
-    "url": "authorisation",
-    # "authentification_check": False,
-    "authentification_token": "d3a5f6cb-01a8-4bff-b076-64550ff85921",
-    # "authorization_check": False,
-    "authorization_data": ["user1", "password1"],
-    "registration_data": {
-        "username": "usery3333w",
-        "password": "password3",
-        "first_name": "first_name3",
-        "last_name": "last_name3",
-        "email": "myvideoboxdsa@gmail.com"
-    }
-})))
 print("sent")
 m = s.recv(2048)
 m = message_receiver.recieve_message(1, m)
@@ -123,7 +145,4 @@ else:
     s.close()
 
 
-
-
-# close the socket
 s.close()

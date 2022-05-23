@@ -24,8 +24,6 @@ lang			python
 
 database		postgresql
 
-ports			smtp pop3 imap 
-
 WAF/Middleware		-/custom
 NAF			-
 

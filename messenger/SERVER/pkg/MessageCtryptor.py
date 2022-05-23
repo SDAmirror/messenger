@@ -11,7 +11,7 @@ class RSACryptor:
             priv = rsa.PrivateKey.load_pkcs1(privatefile.read(), 'PEM')
             return {'key':priv,'errors':[]}
     def load_Public_key(self):
-        with open(f'{self.path}/public{self.id}.pem', 'rb') as publicfile:
+        with open(f'{self.path}public{self.id}.pem', 'rb') as publicfile:
             pub = rsa.PublicKey.load_pkcs1(publicfile.read())
             return {'key':pub,'errors':[]}
 
