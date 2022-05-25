@@ -2,7 +2,8 @@ import uuid
 from DB.models.message_model import MessageInfo
 from DB.schemas.message_shema import MessageSchema
 
-
+def addFriendRequest():
+    schema = MessageSchema()
 def message_rpepare(data,username,loger):
     try:
         reciever = data['reciever']

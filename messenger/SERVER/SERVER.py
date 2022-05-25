@@ -288,7 +288,7 @@ def client_handler(client, id):
             message_processor.updateSent(message.id,logger)
         except Exception as e:
             print('unsent message not sent',e)
-
+    # READY TO LISTEN
     while True:
         try:
             yield 'recv', client
@@ -308,34 +308,69 @@ def client_handler(client, id):
                 cryptor.delete_RSA_keys()
                 break
             print(message)
-            future = pool.submit(message_processor.message_rpepare, message,user.username, logger)
-            yield 'future', future
-            ress = future.result()
-            if ress['message'] != None:
-                message = ress['message']
-                if message.receiver in (active_users.keys()):
-                    ress_id = active_users[message.receiver]
-                    try:
-                        message.id = str(message.id)
-                        yield 'send',client
-                        message.sent = True
-                        message_to_send = json.dumps({'url':"message",'message':message.__dict__})
-                        active_clients[active_users[message.receiver]].send(message_sender.send_message(ress_id,message_to_send))
+            if message['url']=='message':
 
-                        # active_clients[active_users[message.receiver]].send(json.dumps({'message':message.__dict__}).encode())
-
-                    except Exception as e:
-                        message.sent = False
-                        print(e,'not sent to {}'.format(message.receiver))
-
-                future = pool.submit(message_processor.message_processor, message,logger)
+                future = pool.submit(message_processor.message_rpepare, message,user.username, logger)
                 yield 'future', future
                 ress = future.result()
+                if ress['message'] != None:
+                    message = ress['message']
+                    if message.receiver in (active_users.keys()):
+                        ress_id = active_users[message.receiver]
+                        try:
+                            message.id = str(message.id)
+                            yield 'send',client
+                            message.sent = True
+                            message_to_send = json.dumps({'url':"message",'message':message.__dict__})
+                            active_clients[active_users[message.receiver]].send(message_sender.send_message(ress_id,message_to_send))
 
-                if ress['created']:
-                    response_model = json.dumps({'receiver':message.receiver,'url':"status",'saved':True,'sent': message.sent})
-                else:
-                    response_model = json.dumps({'receiver':message.receiver,'url':"status",'saved': False, 'sent': message.sent})
+                            # active_clients[active_users[message.receiver]].send(json.dumps({'message':message.__dict__}).encode())
+
+                        except Exception as e:
+                            message.sent = False
+                            print(e,'not sent to {}'.format(message.receiver))
+
+                    future = pool.submit(message_processor.message_processor, message,logger)
+                    yield 'future', future
+                    ress = future.result()
+
+                    if ress['created']:
+                        response_model = json.dumps({'receiver':message.receiver,'url':"status",'saved':True,'sent': message.sent})
+                    else:
+                        response_model = json.dumps({'receiver':message.receiver,'url':"status",'saved': False, 'sent': message.sent})
+            elif message['url']=='addFriendRequest':
+                future = pool.submit(message_processor.message_rpepare, message, user.username, logger)
+                yield 'future', future
+                ress = future.result()
+                if ress['message'] != None:
+                    message = ress['message']
+                    if message.receiver in (active_users.keys()):
+                        ress_id = active_users[message.receiver]
+                        try:
+                            message.id = str(message.id)
+                            yield 'send', client
+                            message.sent = True
+                            message_to_send = json.dumps({'url': "message", 'message': message.__dict__})
+                            active_clients[active_users[message.receiver]].send(
+                                message_sender.send_message(ress_id, message_to_send))
+
+                            # active_clients[active_users[message.receiver]].send(json.dumps({'message':message.__dict__}).encode())
+
+                        except Exception as e:
+                            message.sent = False
+                            print(e, 'not sent to {}'.format(message.receiver))
+
+                    future = pool.submit(message_processor.message_processor, message, logger)
+                    yield 'future', future
+                    ress = future.result()
+
+                    if ress['created']:
+                        response_model = json.dumps(
+                            {'receiver': message.receiver, 'url': "status", 'saved': True, 'sent': message.sent})
+                    else:
+                        response_model = json.dumps(
+                            {'receiver': message.receiver, 'url': "status", 'saved': False, 'sent': message.sent})
+
 
             try:
                 prep_message = message_sender.send_message(id,response_model)
@@ -378,7 +413,9 @@ def base_server(address):
     ssock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     ssock.bind(address)
     ssock.listen(5)
+
     with context.wrap_socket(ssock, server_side=True) as sock:
+
         while True:
             yield 'recv', sock
             client, addr = sock.accept()
@@ -390,15 +427,20 @@ def base_server(address):
             tasks.append(client_handler(client, id))
 
 
+
+
 # tasks.append(base_server(('192.168.76.217', 4430)))
 # tasks.append(base_server(('172.20.10.8', 4430)))
 tasks.append(base_server(('localhost', 4430)))
+# tasks.append(base_server(('192.168.1.122', 4430)))
 
 if __name__ == '__main__':
     try:
         print("run")
         run()
+
     except KeyboardInterrupt as e:
+        pool.shutdown(wait=True,cancel_futures=True)
         print("keybord interupted",e)
     except Exception as e:
         print(e,'run error')
