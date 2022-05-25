@@ -1,6 +1,4 @@
-import uuid
 import psycopg2.extras
-from DB.models.user_model import CreateUser
 from DB.models.message_model import MessageInfo
 import DB.database as db
 connection_eror = "connection error"
@@ -46,28 +44,29 @@ class CommunicationSchema:
             return {'created': commited, 'errors': [e]}
         return {'created': commited,'errors':[]}
 
-    def searchForSimilar(self, username, logger):
+    def searchFriends(self, username, logger):
         try:
             con = self.db.get_connection()
-            messages = []
+            users = []
             try:
                 cur = con.cursor()
-                sql = "select * from message where receiver = %s and sent=false"
-                cur.execute(sql,(username,))
+                sql = "select username, first_name, last_name from " \
+                      "user_base ub, user_profile up where up.user_id = ub.id " \
+                      "and (username = %s or username ~ concat('^',%s,'.$') or username ~ concat('^',%s,'..$') or username ~ concat('^',%s,'...$') or username ~ concat('^',%s,'....$'))"
+                cur.execute(sql,(username,username,username,username,username,))
                 for row in cur.fetchall():
-                    message = MessageInfo(row[0],row[1],row[2],row[3],row[4],row[5],row[6])
-                    message.send_time = message.send_time.strftime('%H-%M-%S')
-                    message.send_date = message.send_date.__str__()
-                    messages.append(message)
-                return_block = {"messages": messages, "errors": []}
+                    user ={'username':row[0],"firstname":row[1],"lastname":row[2]}
+
+                    users.append(user)
+                return_block = {"users": users, "errors": []}
             except Exception as e:
-                print(e,'send_unsent_messages')
-                return_block = {"messages": None, "errors": [e]}
+                print(e,'search for users')
+                return_block = {"users": None, "errors": [e]}
             finally:
                 cur.close()
                 con.close()
         except Exception as e:
-            return_block = {"messages": None, "errors": [e]}
+            return_block = {"users": None, "errors": [e]}
             print("connection error",e)
         return return_block
 

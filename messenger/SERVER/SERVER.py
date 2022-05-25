@@ -324,8 +324,6 @@ def client_handler(client, id):
                             message_to_send = json.dumps({'url':"message",'message':message.__dict__})
                             active_clients[active_users[message.receiver]].send(message_sender.send_message(ress_id,message_to_send))
 
-                            # active_clients[active_users[message.receiver]].send(json.dumps({'message':message.__dict__}).encode())
-
                         except Exception as e:
                             message.sent = False
                             print(e,'not sent to {}'.format(message.receiver))
@@ -338,46 +336,21 @@ def client_handler(client, id):
                         response_model = json.dumps({'receiver':message.receiver,'url':"status",'saved':True,'sent': message.sent})
                     else:
                         response_model = json.dumps({'receiver':message.receiver,'url':"status",'saved': False, 'sent': message.sent})
-            elif message['url']=='addFriendRequest':
-                future = pool.submit(message_processor.message_rpepare, message, user.username, logger)
+            elif message['url']=='addfriendrequest':
+                future = pool.submit(message_processor.addFriendRequest,message['userpattern'], logger)
                 yield 'future', future
                 ress = future.result()
-                if ress['message'] != None:
-                    message = ress['message']
-                    if message.receiver in (active_users.keys()):
-                        ress_id = active_users[message.receiver]
-                        try:
-                            message.id = str(message.id)
-                            yield 'send', client
-                            message.sent = True
-                            message_to_send = json.dumps({'url': "message", 'message': message.__dict__})
-                            active_clients[active_users[message.receiver]].send(
-                                message_sender.send_message(ress_id, message_to_send))
-
-                            # active_clients[active_users[message.receiver]].send(json.dumps({'message':message.__dict__}).encode())
-
-                        except Exception as e:
-                            message.sent = False
-                            print(e, 'not sent to {}'.format(message.receiver))
-
-                    future = pool.submit(message_processor.message_processor, message, logger)
-                    yield 'future', future
-                    ress = future.result()
-
-                    if ress['created']:
-                        response_model = json.dumps(
-                            {'receiver': message.receiver, 'url': "status", 'saved': True, 'sent': message.sent})
-                    else:
-                        response_model = json.dumps(
-                            {'receiver': message.receiver, 'url': "status", 'saved': False, 'sent': message.sent})
-
+                if ress['users'] != None:
+                    users = ress['users']
+                    response_model = {'url':'addfriendresponse','users':users}
+                else:
+                    response_model = {'url': 'addfriendresponse', 'users': []}
 
             try:
                 prep_message = message_sender.send_message(id,response_model)
                 yield 'send', client
                 client.send(prep_message)
 
-                # client.send(response_model.encode())
             except Exception as e:
                 print('client disconnected', e)
                 cryptor.delete_RSA_keys()
@@ -407,7 +380,6 @@ def client_handler(client, id):
 
 def base_server(address):
     logger.log(logging.INFO,'creation of base server')
-    # context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     context.load_cert_chain('server.crt', 'server.key', password='firstkey')
     ssock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     ssock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

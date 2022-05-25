@@ -1,9 +1,12 @@
 import uuid
 from DB.models.message_model import MessageInfo
 from DB.schemas.message_shema import MessageSchema
+from DB.schemas.communication_schema import CommunicationSchema
 
-def addFriendRequest():
-    schema = MessageSchema()
+def addFriendRequest(username,logger):
+    schema = CommunicationSchema()
+    return schema.searchFriends(username,logger)
+
 def message_rpepare(data,username,loger):
     try:
         reciever = data['reciever']
