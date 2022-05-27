@@ -342,9 +342,10 @@ def client_handler(client, id):
                 ress = future.result()
                 if ress['users'] != None:
                     users = ress['users']
-                    response_model = {'url':'addfriendresponse','users':users}
+
+                    response_model = json.dumps({'url':'addfriendresponse','users':users})
                 else:
-                    response_model = {'url': 'addfriendresponse', 'users': []}
+                    response_model = json.dumps({'url': 'addfriendresponse', 'users': []})
 
             try:
                 prep_message = message_sender.send_message(id,response_model)
