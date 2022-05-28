@@ -132,6 +132,7 @@ def client_handler(client, id):
     #     print(e, 'auth data recieve error')
     # except Exception as e:
     #     print(e, 'loader error')
+    authdatacounter = 0
     while True:
         try:
             yield 'recv', client
@@ -158,12 +159,20 @@ def client_handler(client, id):
             print('error asc', e)
             print(f"client {id} disconnected")
             client.close()
+            cryptor.delete_RSA_keys()
             return
         except Exception as e:
             print('error asc', e)
             print(f"client {id} disconnected")
             client.close()
+            cryptor.delete_RSA_keys()
             return
+        authdatacounter +=1
+        if authdatacounter >6:
+            client.close()
+            cryptor.delete_RSA_keys()
+            return
+
 
     procedure = False
     if message['url'] == 'authentication':
@@ -186,9 +195,9 @@ def client_handler(client, id):
         ress = future.result()
 
         connectionSuccessFlag = ress['flag']
-        resp = message_sender.send_message(id, ress['responce'])
+
         yield 'send', client
-        client.send(resp)
+        client.send(ress['responce'])
         user = ress['user']
     elif message['url'] == 'registration':
         procedure = True
@@ -348,6 +357,8 @@ def client_handler(client, id):
                     response_model = json.dumps({'url': 'addfriendresponse', 'users': []})
 
             try:
+
+
                 prep_message = message_sender.send_message(id,response_model)
                 yield 'send', client
                 client.send(prep_message)

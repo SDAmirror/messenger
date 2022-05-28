@@ -40,6 +40,16 @@ def authorisation(username, password):
         if not user == None:
             if user.password == password:
                 return ress
+            else:
+                ress['user'] = None
+                ress['reason'] = 'wrong password or username'
+
+        else:
+            ress['reason'] = 'wrong password or username'
+
+    else:
+        ress['reason'] = 'server cannot accept connections'
+    return ress
 
 
 def authentification_token_validation(token, username):
@@ -143,6 +153,7 @@ def user_authorisation(id, message_sender, logger,data):
 
     username, password = data["authorization_data"][0], data["authorization_data"][1]
     ress = authorisation(username, password)
+
     if ress["user"] != None:
         user = ress['user']
         print(user.__dict__)
@@ -162,7 +173,7 @@ def user_authorisation(id, message_sender, logger,data):
         flag_processor_success = True
 
     else:
-        resp = message_sender.send_message(id, json.dumps({"AuthenticationUser": None, "auth_success": False}))
+        resp = message_sender.send_message(id, json.dumps({ "auth_success": False,'reason':ress['reason']}))
     return {'responce': resp, 'errors': errors, 'flag': flag,'user':user}
 
 def user_registration_part1(id, message_sender, logger,data):
