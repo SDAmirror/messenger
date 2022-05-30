@@ -88,7 +88,7 @@ def run():
 
 
 def client_handler(client, id):
-
+    connectionSuccessFlag = False
     global logger
     logger.log(logging.INFO,'creation of server keys')
     cryptor = RSACryptor(id)
@@ -133,149 +133,204 @@ def client_handler(client, id):
     # except Exception as e:
     #     print(e, 'loader error')
     authdatacounter = 0
+    attempcounter = 1
     while True:
-        try:
-            yield 'recv', client
-            message = client.recv(2048)
-            message = message_receiver.recieve_message(id, message)
-            print(message)
+        if attempcounter > 5:
+            connectionSuccessFlag = False
+            break
+        while True:
             try:
-                message = json_loader(message)
+                yield 'recv', client
+                message = client.recv(2048)
+                message = message_receiver.recieve_message(id, message)
+                print(message)
                 try:
-                    if 'auth_check' in list(message.keys()):
-                        client.send(message_sender.send_message(id,json.dumps({"auth_data_exchange":True,'error':0})))
-                        break
-                    else:
-                        client.send(message_sender.send_message(id,json.dumps({"auth_data_exchange":False,'error':50401})))
-                except ConnectionResetError as e:
-                    print('error asc', e)
-                    print(f"client {id} disconnected")
-                    client.close()
-                    return
-
-            except json.JSONDecodeError as e:
-                print(e, 'auth data recieve error')
-        except ConnectionResetError as e:
-            print('error asc', e)
-            print(f"client {id} disconnected")
-            client.close()
-            cryptor.delete_RSA_keys()
-            return
-        except Exception as e:
-            print('error asc', e)
-            print(f"client {id} disconnected")
-            client.close()
-            cryptor.delete_RSA_keys()
-            return
-        authdatacounter +=1
-        if authdatacounter >6:
-            client.close()
-            cryptor.delete_RSA_keys()
-            return
-
-
-    procedure = False
-    if message['url'] == 'authentication':
-        fn = con_procc.user_authentication
-        future = pool.submit(fn, id, cryptor, logger, message)
-        yield 'future', future
-        ress = future.result()
-
-
-        connectionSuccessFlag = ress['flag']
-
-        yield 'send', client
-        resp = message_sender.send_message(id, ress['responce'])
-        client.send(resp)
-        user = ress['user']
-    elif message['url'] == 'authorization':
-        fn = con_procc.user_authorisation
-        future = pool.submit(fn, id, message_sender, logger, message)
-        yield 'future', future
-        ress = future.result()
-
-        connectionSuccessFlag = ress['flag']
-
-        yield 'send', client
-        client.send(ress['responce'])
-        user = ress['user']
-    elif message['url'] == 'registration':
-        procedure = True
-        fn = con_procc.user_registration_part1
-        future = pool.submit(fn, id, message_sender, logger, message)
-        yield 'future', future
-        ress = future.result()
-        if ress['success']:
-            user = ress['user']
-            validation_res = False
-            code_send_attempts = 3
-            while code_send_attempts > 0:
-                # fn = con_procc.user_registration_part2
-                # future = pool.submit(fn, id, cryptor, logger, user,context)
-                # yield 'future', future
-                # ress = future.result()
-                ress = con_procc.user_registration_part2(id, message_sender, logger, ress['user'],context)
-
-                if ress['success']:
-                    code = ress['code']
-                    attempts = 3
-                    print(code)
-                    while attempts > 0:
-                        try:
-                            yield 'recv',client
-                            message = client.recv(2048)
-                            message = message_receiver.recieve_message(id,message)
-                            print(message)
-                        except Exception as e:
-                            print(f"error: {e}")
-
-                        fn = con_procc.user_registration_part3
-                        future = pool.submit(fn,id, message_sender, logger, user,code,message)
-                        ress = future.result()
-                        if ress['success']:
-                            if ress['validation']:
-                                validation_res = True
-                                break
-                            else:
-                                response = message_sender.send_message(id,f"invalid code, you have {attempts-1} more attemps")
-                                client.send(response)
+                    message = json_loader(message)
+                    try:
+                        if 'auth_check' in list(message.keys()):
+                            client.send(message_sender.send_message(id,json.dumps({"auth_data_exchange":True,'error':0})))
+                            break
                         else:
-                            client.send(message_sender.send_message(id,"smth wrong"))
+                            client.send(message_sender.send_message(id,json.dumps({"auth_data_exchange":False,'error':50401})))
+                    except ConnectionResetError as e:
+                        print('error asc', e)
+                        print(f"client {id} disconnected")
+                        client.close()
+                        return
 
-                        attempts -= 1
+                except json.JSONDecodeError as e:
+                    print(e, 'auth data recieve error')
+            except ConnectionResetError as e:
+                print('error asc', e)
+                print(f"client {id} disconnected")
+                active_clients.pop(id)
+                client.close()
+                cryptor.delete_RSA_keys()
+                return
+            except Exception as e:
+                print('error asc', e)
+                break
+                # print(f"client {id} disconnected")
+                # active_clients.pop(id)
+                # client.close()
+                # cryptor.delete_RSA_keys()
+                # return
 
-                    code_send_attempts -= 1
-                    if validation_res:
-                        break
+
+
+
+            authdatacounter +=1
+            if authdatacounter >6:
+                active_clients.pop(id)
+                client.close()
+                cryptor.delete_RSA_keys()
+                return
+
+
+        procedure = False
+
+        if message['url'] == 'authentication':
+            fn = con_procc.user_authentication
+            future = pool.submit(fn, id, cryptor, logger, message)
+            yield 'future', future
+            ress = future.result()
+
+
+            connectionSuccessFlag = ress['flag']
+
+            yield 'send', client
+            resp = message_sender.send_message(id, ress['responce'])
+            client.send(resp)
+            user = ress['user']
+            print(ress,'205')
+        elif message['url'] == 'authorization':
+            fn = con_procc.user_authorisation
+            future = pool.submit(fn, id, message_sender, logger, message)
+            yield 'future', future
+            ress = future.result()
+
+            connectionSuccessFlag = ress['flag']
+
+            yield 'send', client
+            client.send(ress['responce'])
+            user = ress['user']
+        elif message['url'] == 'registration':
+            procedure = True
+            fn = con_procc.user_registration_part1
+            future = pool.submit(fn, id, message_sender, logger, message)
+            yield 'future', future
+            r1ress = future.result()
+            print(r1ress,220)
+            if r1ress['success']:
+                user = r1ress['user']
+
+                validation_res = False
+                code_send_attempts = 3
+                while code_send_attempts > 0:
+
+
+
+                    r2ress = con_procc.user_registration_part2(id, message_sender, logger, user,context)
+                    print(r2ress,231)
+                    try:print(user.__dict__)
+                    except Exception as e:print(e)
+                    if r2ress['success']:
+                        code = r2ress['code']
+                        attempts = 3
+                        print(code)
+                        while attempts > 0:
+                            try:
+                                yield 'recv',client
+                                message = client.recv(2048)
+                                message = message_receiver.recieve_message(id,message)
+                                print(message)
+                                try:
+                                    message = json_loader(message)
+                                    if not 'code' in list(message.keys()):
+                                        client.send(message_sender.send_message(id, json.dumps(
+                                            {'url': 'registration', "auth_data_exchange": False,
+                                             'error': 'data crashed or code or sent code empty'})))
+
+                                        attempts -= 1
+                                        continue
+                                except json.JSONDecodeError as e:
+                                    client.send(message_sender.send_message(id, json.dumps({'url':'registration',"auth_data_exchange": False, 'error': 'data crashed or code or sent code empty'})))
+                                    print(e, 'auth data recieve error')
+                                    attempts -= 1
+                                    continue
+                                except Exception as e:
+                                    client.send(message_sender.send_message(id, json.dumps(
+                                        {'url': 'registration', "auth_data_exchange": False,
+                                         'error': 'data crashed or code or sent code empty'})))
+                                    print(e, 'auth data recieve error')
+                                    attempts -= 1
+                                    continue
+                            except ConnectionResetError as e:
+                                print('error asc', e)
+                                print(f"client {id} disconnected")
+                                active_clients.pop(id)
+                                client.close()
+                                cryptor.delete_RSA_keys()
+                                return
+                            except Exception as e:
+                                print(f"error: {e}")
+
+                            fn = con_procc.user_registration_part3
+                            future = pool.submit(fn,id, message_sender, logger, user,code,message)
+                            r3ress = future.result()
+                            print(r3ress)
+                            if r3ress['success']:
+                                if r3ress['validation']:
+                                    validation_res = True
+                                    break
+                                else:
+                                    response = message_sender.send_message(id,json.dumps({'url':'registration',"auth_data_exchange": False, 'error': f"invalid code, you have {attempts-1} more attemps"}))
+                                    client.send(response)
+                            else:
+                                client.send(message_sender.send_message(id,json.dumps({'url':'registration',"auth_data_exchange": False, 'error': "smth wrong"})))
+
+                            attempts -= 1
+
+                        code_send_attempts -= 1
+                        if validation_res:
+                            break
+                        else:
+                            response = message_sender.send_message(id,json.dumps({'url':'registration',"auth_data_exchange": False, 'error': "invalid code, we sent new code to your email"}))
+                            client.send(response)
+
+
+
+                if validation_res:
+                # if True:
+                    fn = con_procc.user_registration_part4
+                    print(user.__dict__,user)
+                    future = pool.submit(fn, id, message_sender, logger, user)
+                    yield 'future', future
+                    r4ress = future.result()
+                    if r4ress['success']:
+                        connectionSuccessFlag = True
+                        client.send(r4ress['response'])
                     else:
-                        response = message_sender.send_message(id,f"invalid code, we sent new code to your email")
-                        client.send(response)
-            if validation_res:
-            # if True:
-                fn = con_procc.user_registration_part4
-                future = pool.submit(fn, id, message_sender, logger, user)
-                yield 'future', future
-                ress = future.result()
-                if ress['success']:
-                    connectionSuccessFlag = True
-                    client.send(ress['response'])
+                        client.send(r4ress['response'])
+                        connectionSuccessFlag = False
                 else:
-                    client.send(ress['response'])
-                    connectionSuccessFlag = False
+                    response_model = message_sender.send_message(id,json.dumps({'url':'registration',"message": "registration failed","auth_success": False}))
+                    client.send(response_model)
             else:
-                response_model = message_sender.send_message(id,json.dumps({"message": "registration failed","auth_success": False}))
-                client.send(response_model)
-        else:
-            client.send(ress['response'])
-            client.close()
-            return
+                client.send(r1ress['response'])
+                active_clients.pop(id)
+                cryptor.delete_RSA_keys()
+                client.close()
+                return
 
-        connectionSuccessFlag = ress['success']
 
-        resp = message_sender.send_message(id,ress['response'])
-        yield 'send',client
-        client.send(resp)
-        # user = ress['user']
+            # resp = message_sender.send_message(id,r4ress['response'])
+            # yield 'send',client
+            # client.send(resp)
+            # user = ress['user']
+        if connectionSuccessFlag:
+            break
+        attempcounter += 1
 
     print('connect flag server ' ,connectionSuccessFlag)
     if not connectionSuccessFlag:
@@ -288,6 +343,7 @@ def client_handler(client, id):
     future = pool.submit(message_processor.send_unsent_messages, user.username,logger)
     yield 'future', future
     ress = future.result()
+    #if client ready to listen
     for message in ress['messages']:
         try:
             m = message_sender.send_message(id, json.dumps(message.__dict__))
@@ -299,6 +355,7 @@ def client_handler(client, id):
             print('unsent message not sent',e)
     # READY TO LISTEN
     while True:
+        print('ready to listen messages from {}'.format(user.username))
         try:
             yield 'recv', client
             message = client.recv(2048)
@@ -313,10 +370,13 @@ def client_handler(client, id):
                 break
             except Exception as e:
                 print(e,'message load error')
-                client.close()
-                cryptor.delete_RSA_keys()
-                break
+                continue
+                # client.close()
+                # cryptor.delete_RSA_keys()
+                # break
             print(message)
+            if 'url' not in message.keys():
+                continue
             if message['url']=='message':
 
                 future = pool.submit(message_processor.message_rpepare, message,user.username, logger)
