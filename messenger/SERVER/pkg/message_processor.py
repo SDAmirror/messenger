@@ -27,6 +27,11 @@ def updateSent(id,logger):
     schema = MessageSchema()
 
     return schema.updateSent(id, logger)
+def sendAllMessages(selfusername,username,logger):
+    schema = MessageSchema()
+    messages = schema.load_all_messages(selfusername, username, logger)
+    return messages
+
 def message_processor(message,logger):
 
     schema = MessageSchema()

@@ -121,7 +121,7 @@ def client_handler(client, id):
 
 
     # con_procc = connection_processor.Connection_Processor(id,cryptor,logger)
-    print('server')
+    print('server keys exhcanged')
     # yield 'recv', client
     # message = client.recv(2048)
     # message = message_receiver.recieve_message(id, message)
@@ -198,8 +198,8 @@ def client_handler(client, id):
 
             connectionSuccessFlag = ress['flag']
 
-            yield 'send', client
             resp = message_sender.send_message(id, ress['responce'])
+            yield 'send', client
             client.send(resp)
             user = ress['user']
             print(ress,'205')
@@ -301,7 +301,7 @@ def client_handler(client, id):
 
 
                 if validation_res:
-                # if True:
+                    # if True:
                     fn = con_procc.user_registration_part4
                     print(user.__dict__,user)
                     future = pool.submit(fn, id, message_sender, logger, user)
@@ -346,7 +346,7 @@ def client_handler(client, id):
     #if client ready to listen
     for message in ress['messages']:
         try:
-            m = message_sender.send_message(id, json.dumps(message.__dict__))
+            m = message_sender.send_message(id, json.dumps({'url':"message",'message':message.__dict__}))
             yield 'send', client
             client.send(m)
 
@@ -354,8 +354,8 @@ def client_handler(client, id):
         except Exception as e:
             print('unsent message not sent',e)
     # READY TO LISTEN
+    print('ready to listen messages from {}'.format(user.username))
     while True:
-        print('ready to listen messages from {}'.format(user.username))
         try:
             yield 'recv', client
             message = client.recv(2048)
@@ -367,7 +367,14 @@ def client_handler(client, id):
                 print(f"client {id} disconnected")
                 client.close()
                 cryptor.delete_RSA_keys()
+                active_clients.pop(id)
                 break
+            except ConnectionResetError as e:
+                print('error asc', e)
+                print(f"client {id} disconnected")
+                active_clients.pop(id)
+                client.close()
+                cryptor.delete_RSA_keys()
             except Exception as e:
                 print(e,'message load error')
                 continue
@@ -415,38 +422,71 @@ def client_handler(client, id):
                     response_model = json.dumps({'url':'addfriendresponse','users':users})
                 else:
                     response_model = json.dumps({'url': 'addfriendresponse', 'users': []})
+            elif message['url']=='loadchatrequest':
 
+                future = pool.submit(message_processor.sendAllMessages,user.username, message['username'], logger)
+                yield 'future', future
+                ress = future.result()
+
+                for message in ress['messages']:
+                    try:
+                        m = message_sender.send_message(id, json.dumps({'url':"message",'message':message.__dict__}))
+                        yield 'send', client
+                        client.send(m)
+
+                        message_processor.updateSent(message.id, logger)
+                    except ConnectionResetError as e:
+                        print('error asc', e)
+                        print(f"client {id} disconnected")
+                        active_clients.pop(id)
+                        client.close()
+                        cryptor.delete_RSA_keys()
+                        return
+                    except Exception as e:
+                        print('chat message not sent', e)
+                response_model = json.dumps({'url': 'loadchatresponse', 'status':True})
             try:
 
-
-                prep_message = message_sender.send_message(id,response_model)
+                prep_message = message_sender.send_message(id, response_model)
                 yield 'send', client
                 client.send(prep_message)
-
+            except ConnectionAbortedError as e:
+                print(f'con error{e}')
+                print(f"client {id} disconnected")
+                client.close()
+                cryptor.delete_RSA_keys()
+                return
+            except ConnectionResetError as e:
+                print('error asc', e)
+                print(f"client {id} disconnected")
+                active_clients.pop(id)
+                client.close()
+                cryptor.delete_RSA_keys()
+                return
             except Exception as e:
                 print('client disconnected', e)
-                cryptor.delete_RSA_keys()
-                client.close()
-                break
+                continue
+
+
 
         except ConnectionAbortedError as e:
             print(f'con error{e}')
             print(f"client {id} disconnected")
             client.close()
             cryptor.delete_RSA_keys()
-            break
+            return
         except ConnectionResetError as e:
             print(f'con error{e}')
             print(f"client {id} disconnected")
             client.close()
             cryptor.delete_RSA_keys()
-            break
+            return
         except Exception as e:
             print(f'con error{e}')
             print(f"client {id} disconnected")
             client.close()
             cryptor.delete_RSA_keys()
-            break
+            return
     print('closed')
     return
 

@@ -96,14 +96,14 @@ class MessageSchema:
             print("connection error", e)
             return {'created': commited, 'errors': [e]}
         return {'created': commited, 'errors': []}
-    def load_all_messages(self,username, logger):
+    def load_all_messages(self,selfusername,username, logger):
         try:
             con = self.db.get_connection()
             messages = []
             try:
                 cur = con.cursor()
-                sql = "select * from message where receiver = %s or sender=%s"
-                cur.execute(sql,(username,username,))
+                sql = "select * from message where ( receiver = %s and sender=%s) or ( receiver = %s and sender=%s) order by send_date,send_time"
+                cur.execute(sql,(selfusername,username,username,selfusername,))
                 for row in cur.fetchall():
                     message = MessageInfo(row[0],row[1],row[2],row[3],row[4],row[5],row[6])
                     message.send_time = message.send_time.strftime('%H-%M-%S')
