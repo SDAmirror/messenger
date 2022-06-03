@@ -8,26 +8,6 @@ from .email_validation import Validator
 from pkg.message_processor import *
 import rsa
 
-"""
-
-кейс 1
-    я такой клиент ,я  не зарегестрирован, я хочу новый аккаунт
-        форма регистрации
-кейс 2
-    я зарегестрирован вот мои аторизационные данные
-        проверить аторизационные данные
-кейс 3 
-    я авторизован вот мой аутентификатор/токен private.key .crt
-        вернуть информацию
-кейс 4
-    я забыл пароль
-        аутентификация        
-
-authentification_check: 
-authorization_check: 
-authentification_token: token
-authorization: [username,password]
-"""
 message_recirver = Message_Recirver()
 message_sender = Message_Sender()
 
@@ -101,15 +81,9 @@ def email_validation(email):
     else:
         return False
 
-
-# try:
-#     emailObject = validate_email(testEmail)
-#     testEmail = emailObject.email
-#     print(testEmail)
-# except EmailNotValidError as errorMsg:
-#     print(str(errorMsg))
-
-
+def logout(username,logger):
+    userSchema = UserSchema()
+    return userSchema.deleteAuthToken(username)
 
 def user_authentication(id, cryptor, logger,data):
     print(data,'atu',type(data))

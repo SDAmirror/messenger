@@ -192,6 +192,8 @@ class UserSchema:
             print(connection_eror)
             resp = {'deleted': False, 'errors': [connection_eror,e]}
 
+
+
     def createNewUser(self, user):
 
         sql1 = "insert into user_base values(%s,%s,%s,%s)"
