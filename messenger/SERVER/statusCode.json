@@ -1,0 +1,15 @@
+{
+  "50200": "status OK",
+  "50242": "verification code sent",
+  "50243": "verification code valid",
+  "50244": "registration success",
+  "50245": "authentication success",
+
+  "50441": "username taken",
+  "50442": "failure wrong email format",
+  "50443": "failure code validation",
+  "50444": "failure code receive",
+  "50445": "failure email",
+
+  "50541": "server error"
+}

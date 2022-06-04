@@ -55,7 +55,7 @@ class MessageSchema:
                 sql = "select * from message where receiver = %s and sent=false"
                 cur.execute(sql,(username,))
                 for row in cur.fetchall():
-                    message = MessageInfo(row[0],row[1],row[2],row[3],row[4],row[5],row[6])
+                    message = MessageInfo(str(row[0]),row[1],row[2],row[3],row[4],row[5],row[6])
                     message.send_time = message.send_time.strftime('%H-%M-%S')
                     message.send_date = message.send_date.__str__()
                     messages.append(message)
@@ -105,7 +105,7 @@ class MessageSchema:
                 sql = "select * from message where ( receiver = %s and sender=%s) or ( receiver = %s and sender=%s) order by send_date,send_time"
                 cur.execute(sql,(selfusername,username,username,selfusername,))
                 for row in cur.fetchall():
-                    message = MessageInfo(row[0],row[1],row[2],row[3],row[4],row[5],row[6])
+                    message = MessageInfo(str(row[0]),row[1],row[2],row[3],row[4],row[5],row[6])
                     message.send_time = message.send_time.strftime('%H-%M-%S')
                     message.send_date = message.send_date.__str__()
                     messages.append(message)

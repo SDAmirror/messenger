@@ -168,14 +168,14 @@ def user_registration_part1(id, message_sender, logger,data):
     user.is_active = True
 
     if not email_validation(user.email):
-        response_model = message_sender.send_message(json.dumps({"message": "registration failed: wrong email format", "auth_success": False}))
+        response_model = message_sender.send_message(id,json.dumps({"url":"registration","message": "registration failed: wrong email format" ,'statusCode':50442, "auth_success": False}))
         return {'success':False,'response':response_model}
     checkUser = userSchema.getUserByUsername(user.username)
 
     if checkUser['user'] == None and len(checkUser['errors']) == 0:
         return {'success':True,'user':user}
     else:
-        response_model = message_sender.send_message(id,json.dumps({"message": "registration failed: username taken", "auth_success": False}))
+        response_model = message_sender.send_message(id,json.dumps({"url":"registration","message": "registration failed: username taken" ,'statusCode':50441, "auth_success": False}))
         return {'success':False,'response':response_model}
 #TODO
 def user_registration_part2(id, message_sender, logger,user,context=None):
@@ -185,7 +185,7 @@ def user_registration_part2(id, message_sender, logger,user,context=None):
     if len(ress['errors']) == 0:
         return {'success':True,'code':code_generated}
     else:
-        response_model = message_sender.send_message(id,json.dumps({"message": "Validation code error", "auth_success": False}))
+        response_model = message_sender.send_message(id,json.dumps({"message": "Validation code error",'statusCode':50443, "auth_success": False}))
         return {'success':False,'response':response_model}
 
 def user_registration_part3(id, message_sender, logger,user, code,message):
@@ -203,13 +203,10 @@ def user_registration_part3(id, message_sender, logger,user, code,message):
     #           )
     #     response_model = message_sender.send_message(id,json.dumps({"message": "data transmition failure packets are damaged", "auth_success": False}))
     #     return {'success':False,'response':response_model}
-    # code_received = code_validation_data['validation_code']
     code_received = message['code']
-
-    # validator.valid(user, code, coderecieved)  (TRUE/FALSE) {result:TRUE/FALSE,errors=[]}
-
     validation_res = validator.validate(user, code, code_received)
     return {'success':True,'validation':validation_res}
+
 def  user_registration_part4(id, message_sender, logger,user):
     userSchema = UserSchema()
     flag = False
@@ -217,7 +214,7 @@ def  user_registration_part4(id, message_sender, logger,user):
     response_model = ''
     ress = userSchema.createNewUser(user)
     if 'username_taken' in ress['errors']:
-        response_model = message_sender.send_message(id,json.dumps({'url':'registration',"message": "registration failed: username already taken", "auth_success": False}))
+        response_model = message_sender.send_message(id,json.dumps({'url':'registration',"message": "registration failed: username already taken",'statusCode':50441, "auth_success": False}))
         return {'success':False,'response':response_model}
     if ress['created']:
         usertoken = str(createAuthToken(user.username))
@@ -228,12 +225,12 @@ def  user_registration_part4(id, message_sender, logger,user):
         flag = newAuthorisation(user.username, usertoken, '', '', '')
         if not flag:
 
-            response_model = message_sender.send_message(id,json.dumps({'url':'registration',"AuthenticationUser": authUser.__dict__, "auth_success": False}))
+            response_model = message_sender.send_message(id,json.dumps({'url':'registration',"message": "successfull registration: Server error",'statusCode':50541, "auth_success": True}))
             return {'success': False, 'response': response_model,'errors':['UserAuthorisationFailure']}
         else:
             # TODO registration logs
-            response_model = message_sender.send_message(id,json.dumps({'url':'registration',"AuthenticationUser": authUser.__dict__, "auth_success": True}))
+            response_model = message_sender.send_message(id,json.dumps({'url':'registration',"AuthenticationUser": authUser.__dict__, 'statusCode':50245,"auth_success": True}))
             return {'success': True, 'response': response_model}
     else:
-        response_model = message_sender.send_message(id,json.dumps({'url':'registration',"message": "registration failed because of: {}".format(';'.join(ress['errors'])), "auth_success": False}))
+        response_model = message_sender.send_message(id,json.dumps({'url':'registration',"message": "registration failed Server Error", 'statusCode':50541,"auth_success": False}))
         return {'success': False, 'response': response_model,'errors':['UsernameTaken']}

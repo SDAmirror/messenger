@@ -144,6 +144,7 @@ def client_handler(client, id):
         connectionSuccessFlag = False
         attempcounter = 1
         while True:
+            print("auth attemp {}".format(attempcounter))
             if attempcounter > 5:
                 connectionSuccessFlag = False
                 break
@@ -152,7 +153,6 @@ def client_handler(client, id):
                 yield 'recv', client
                 message = client.recv(2048)
                 if not message:
-                    print(f'con error {e}')
                     print(f"client {id} disconnected")
                     client.close()
                     cryptor.delete_RSA_keys()
@@ -164,10 +164,13 @@ def client_handler(client, id):
                     message = json_loader(message)
                     try:
                         if 'auth_check' in list(message.keys()):
+                            yield 'send', client
                             client.send(message_sender.send_message(id,json.dumps({"auth_data_exchange":True,'error':0})))
 
                         else:
+                            yield 'send', client
                             client.send(message_sender.send_message(id,json.dumps({"auth_data_exchange":False,'error':50401})))
+                            continue
 
                     except ConnectionAbortedError as e:
                         print(f'con error {e}')
@@ -248,6 +251,7 @@ def client_handler(client, id):
                 r1ress = future.result()
                 print(r1ress,220)
                 if r1ress['success']:
+
                     user = r1ress['user']
 
                     validation_res = False
@@ -261,6 +265,11 @@ def client_handler(client, id):
                         try:print(user.__dict__)
                         except Exception as e:print(e)
                         if r2ress['success']:
+                            respSuccess = message_sender.send_message(id, json.dumps({
+                                "url": "registration", "message": "verification code sent to your email",
+                                 'statusCode': 50242, "auth_success": True}))
+                            yield 'send',client
+                            client.send(respSuccess)
                             code = r2ress['code']
                             attempts = 5
                             print(code)
@@ -273,21 +282,27 @@ def client_handler(client, id):
                                     try:
                                         message = json_loader(message)
                                         if not 'code' in list(message.keys()):
+                                            yield 'send',client
                                             client.send(message_sender.send_message(id, json.dumps(
-                                                {'url': 'registration', "auth_data_exchange": False,
-                                                 'error': 'data crashed or code or sent code empty'})))
+                                                {'url': 'registration',
+                                                 'message': 'data crashed or code or sent code empty',
+                                                 'statusCode': 50444,"auth_success": False})))
 
                                             attempts -= 1
                                             continue
                                     except json.JSONDecodeError as e:
-                                        client.send(message_sender.send_message(id, json.dumps({'url':'registration',"auth_data_exchange": False, 'error': 'data crashed or code or sent code empty'})))
+                                        yield 'send', client
+                                        client.send(message_sender.send_message(id, json.dumps({
+                                            'url': 'registration', 'message': 'data crashed or code or sent code empty',
+                                                 'statusCode': 50444,"auth_success": False})))
                                         print(e, 'reg data recieve error')
                                         attempts -= 1
                                         continue
                                     except Exception as e:
-                                        client.send(message_sender.send_message(id, json.dumps(
-                                            {'url': 'registration', "auth_data_exchange": False,
-                                             'error': 'data crashed or code or sent code empty'})))
+                                        yield 'send', client
+                                        client.send(message_sender.send_message(id, json.dumps({
+                                            'url': 'registration', 'message': 'data crashed or code or sent code empty',
+                                            'statusCode': 50444, "auth_success": False})))
                                         print(e, 'reg data recieve error 2')
                                         attempts -= 1
                                         continue
@@ -310,10 +325,16 @@ def client_handler(client, id):
                                         validation_res = True
                                         break
                                     else:
-                                        response = message_sender.send_message(id,json.dumps({'url':'registration',"auth_data_exchange": False, 'error': f"invalid code, you have {attempts-1} more attemps"}))
+                                        response = message_sender.send_message(id,json.dumps({
+                                            'url': 'registration', 'message': f"invalid code, you have {attempts-1} more attemps",
+                                            'statusCode': 50443, "auth_success": False}))
+                                        yield 'send',client
                                         client.send(response)
                                 else:
-                                    client.send(message_sender.send_message(id,json.dumps({'url':'registration',"auth_data_exchange": False, 'error': "smth wrong"})))
+                                    yield 'send', client
+                                    client.send(message_sender.send_message(id,json.dumps({
+                                            'url': 'registration', 'message': 'Server error',
+                                            'statusCode': 50551, "auth_success": False})))
 
                                 attempts -= 1
 
@@ -321,7 +342,10 @@ def client_handler(client, id):
                             if validation_res:
                                 break
                             else:
-                                response = message_sender.send_message(id,json.dumps({'url':'registration',"auth_data_exchange": False, 'error': "invalid code, we sent new code to your email"}))
+                                response = message_sender.send_message(id,json.dumps({
+                                            'url': 'registration', 'message': "invalid code, we sent new code to your email",
+                                                 'statusCode': 50443,"auth_success": False}))
+                                yield 'send', client
                                 client.send(response)
 
 
@@ -335,19 +359,20 @@ def client_handler(client, id):
                         r4ress = future.result()
                         if r4ress['success']:
                             connectionSuccessFlag = True
+                            yield 'send', client
                             client.send(r4ress['response'])
                         else:
-                            client.send(r4ress['response'])
                             connectionSuccessFlag = False
+                            yield 'send', client
+                            client.send(r4ress['response'])
                     else:
                         response_model = message_sender.send_message(id,json.dumps({'url':'registration',"message": "registration failed","auth_success": False}))
+                        yield 'send', client
                         client.send(response_model)
                 else:
+                    yield 'send', client
                     client.send(r1ress['response'])
-                    active_clients.pop(id)
-                    cryptor.delete_RSA_keys()
-                    client.close()
-                    return
+                    continue
 
 
                 # resp = message_sender.send_message(id,r4ress['response'])
@@ -392,6 +417,12 @@ def client_handler(client, id):
             try:
                 yield 'recv', client
                 message = client.recv(2048)
+                if not message:
+                    print(f"client {id} disconnected")
+                    client.close()
+                    cryptor.delete_RSA_keys()
+                    active_clients.pop(id)
+                    return
                 message = message_receiver.recieve_message(id,message)
                 try:
                     message = json_loader(message)
