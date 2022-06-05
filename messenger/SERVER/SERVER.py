@@ -16,8 +16,7 @@ from logger import Logging
 
 __basedir__ = os.path.dirname(os.path.realpath(__file__))
 print(os.path.dirname(os.path.realpath(__file__)))
-# postgres
-# 123456
+
 loger = 1
 
 keypairs = {}
@@ -125,18 +124,9 @@ def client_handler(client, id):
         return
 
 
-    # con_procc = connection_processor.Connection_Processor(id,cryptor,logger)
+
     print('server keys exhcanged')
-    # yield 'recv', client
-    # message = client.recv(2048)
-    # message = message_receiver.recieve_message(id, message)
-    # print(message)
-    # try:
-    #     message = json_loader(message)
-    # except json.JSONDecodeError as e:
-    #     print(e, 'auth data recieve error')
-    # except Exception as e:
-    #     print(e, 'loader error')
+
     SOCKETSTILLCONNECTED = True
     LOGOUTSIGNAL = False
     while True:
@@ -230,9 +220,7 @@ def client_handler(client, id):
                 yield 'send', client
                 client.send(resp)
                 user = ress['user']
-                print(ress,'205')
             elif message['url'] == 'authorization':
-
                 fn = con_procc.user_authorisation
                 future = pool.submit(fn, id, message_sender, logger, message)
                 yield 'future', future

@@ -3,13 +3,18 @@
   "50242": "verification code sent",
   "50243": "verification code valid",
   "50244": "registration success",
-  "50245": "authentication success",
+  "50205": "authentication success",
 
   "50441": "username taken",
   "50442": "failure wrong email format",
   "50443": "failure code validation",
   "50444": "failure code receive",
   "50445": "failure email",
+  "50425": "authentication failed",
+  "50435": "wrong password or username",
 
-  "50541": "server error"
+
+  "50505": "server error",
+  "50501": "server error"
+
 }

@@ -23,12 +23,15 @@ def authorisation(username, password):
             else:
                 ress['user'] = None
                 ress['reason'] = 'wrong password or username'
+                ress['statusCode'] = 50435
 
         else:
             ress['reason'] = 'wrong password or username'
+            ress['statusCode'] = 50435
 
     else:
         ress['reason'] = 'server cannot accept connections'
+        ress['statusCode'] = 50505
     return ress
 
 
@@ -103,7 +106,7 @@ def user_authentication(id, cryptor, logger,data):
         user = ress['user']
         if ress['user'] == None:
             errors.append(ress['errors'])
-            response_model = json.dumps({"message": "authentication failed", "auth_success": False})
+            response_model = json.dumps({'url': 'authentication',"message": "authentication failed",'statusCode': 50425, "auth_success": False})
             return {'responce': response_model, 'errors': errors, 'flag': flag}
         usertoken = str(createAuthToken(username))
         authUser = AuthenticatedUser(ress["user"].__dict__, usertoken)
@@ -111,15 +114,17 @@ def user_authentication(id, cryptor, logger,data):
         ress = refreshAuthToken(username, usertoken)
         eflag = ress['exist']
         if not eflag:
-            response_model = json.dumps({"AuthenticationUser": authUser.__dict__, "auth_success": False})
-            errors.append('token refresh ')
+            response_model = json.dumps({'url': 'authentication',"message": "authentication failed: Server error",'statusCode':50505, "auth_success": False})
+            errors.append('token refresh')
         else:
             flag = True
-            response_model = json.dumps({"AuthenticationUser": authUser.__dict__, "auth_success": True})
+            response_model = json.dumps({'url': 'authentication',"AuthenticationUser": authUser.__dict__,'statusCode':50205, "auth_success": True})
     else:
-        response_model = json.dumps({"message": "authentication failed", "auth_success": False})
+
+        response_model = json.dumps({'url': 'authentication',"message": "authentication failed",'statusCode': 50425, "auth_success": False})
 
     return {'responce': response_model, 'errors': errors, 'flag': flag,'user':user}
+
 def user_authorisation(id, message_sender, logger,data):
 
     user = None
@@ -140,10 +145,10 @@ def user_authorisation(id, message_sender, logger,data):
         # try catch
         eflag = newAuthorisation(username, usertoken, '', '', '')
         if not eflag:
-            resp = message_sender.send_message(id, json.dumps({"AuthenticationUser": authUser.__dict__, "auth_success": False}))
+            resp = message_sender.send_message(id, json.dumps({'url': 'authorization',"message": "authentication failed: Server error",'statusCode':50505, "auth_success": False}))
         else:
             print(authUser.__dict__)
-            resp = message_sender.send_message(id, json.dumps({"AuthenticationUser": authUser.__dict__, "auth_success": True}))
+            resp = message_sender.send_message(id, json.dumps({'url': 'authorization',"AuthenticationUser": authUser.__dict__,'message':"Authorisation success",'statusCode':50205, "auth_success": True}))
             flag = True
 
         # TODO return token info from validation,
@@ -151,7 +156,7 @@ def user_authorisation(id, message_sender, logger,data):
         flag_processor_success = True
 
     else:
-        resp = message_sender.send_message(id, json.dumps({ "auth_success": False,'reason':ress['reason']}))
+        resp = message_sender.send_message(id, json.dumps({ 'url': 'authorization','message':ress['reason'],'statusCode':ress['statusCode'] ,"auth_success": False}))
     return {'responce': resp, 'errors': errors, 'flag': flag,'user':user}
 
 def user_registration_part1(id, message_sender, logger,data):
@@ -225,12 +230,12 @@ def  user_registration_part4(id, message_sender, logger,user):
         flag = newAuthorisation(user.username, usertoken, '', '', '')
         if not flag:
 
-            response_model = message_sender.send_message(id,json.dumps({'url':'registration',"message": "successfull registration: Server error",'statusCode':50541, "auth_success": True}))
+            response_model = message_sender.send_message(id,json.dumps({'url':'registration',"message": "successfull registration: Server error",'statusCode':50505, "auth_success": True}))
             return {'success': False, 'response': response_model,'errors':['UserAuthorisationFailure']}
         else:
             # TODO registration logs
-            response_model = message_sender.send_message(id,json.dumps({'url':'registration',"AuthenticationUser": authUser.__dict__, 'statusCode':50245,"auth_success": True}))
+            response_model = message_sender.send_message(id,json.dumps({'url':'registration',"AuthenticationUser": authUser.__dict__, 'statusCode':50205,"auth_success": True}))
             return {'success': True, 'response': response_model}
     else:
-        response_model = message_sender.send_message(id,json.dumps({'url':'registration',"message": "registration failed Server Error", 'statusCode':50541,"auth_success": False}))
+        response_model = message_sender.send_message(id,json.dumps({'url':'registration',"message": "registration failed Server Error", 'statusCode':50505,"auth_success": False}))
         return {'success': False, 'response': response_model,'errors':['UsernameTaken']}
