@@ -2,13 +2,17 @@ import uuid
 import psycopg2.extras
 from DB.models.user_model import CreateUser
 from DB.models.message_model import MessageInfo
-import DB.database as db
+import DB.database as db2
 connection_eror = "connection error"
 database_error = "database error"
 
 class MessageSchema:
     def __init__(self):
-        self.db = db
+        self.db = db2
+        # self.db = db
+        # if db == None:
+        #     self.db = db2.get_connection()
+
 
     def insert_message(self,message,logger):
         # sql1 = "insert into messages values(%s,%s,%s,%s)"
@@ -49,6 +53,7 @@ class MessageSchema:
     def send_unsent_messages(self, username, logger):
         try:
             con = self.db.get_connection()
+            # con = self.db
             messages = []
             try:
                 cur = con.cursor()
@@ -71,13 +76,14 @@ class MessageSchema:
             print("connection error",e)
         return return_block
 
-    def updateSent(self,id,logger):
+    def updateSent(self,id,logger,db=None):
 
 
         sql = "update message set sent=true where id = %s"
         commited = False
         try:
             con = self.db.get_connection()
+            # con = self.db
             try:
                 psycopg2.extras.register_uuid()
                 cur = con.cursor()
@@ -96,9 +102,10 @@ class MessageSchema:
             print("connection error", e)
             return {'created': commited, 'errors': [e]}
         return {'created': commited, 'errors': []}
-    def load_all_messages(self,selfusername,username, logger):
+    def load_all_messages(self,selfusername,username, logger, db=None):
         try:
             con = self.db.get_connection()
+            # con = self.db
             messages = []
             try:
                 cur = con.cursor()

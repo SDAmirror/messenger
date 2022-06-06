@@ -3,16 +3,20 @@ import uuid
 import psycopg2.extras
 
 from DB.models.user_model import CreateUser
-import DB.database as db
+import DB.database as db2
 connection_eror = "connection error"
 database_error = "database error"
 class UserSchema:
     def __init__(self):
-        self.db = db
+        self.db = db2
+        # self.db = db
+        # if db == None:
+        #     self.db = db2.get_connection()
     def authenticate_user(self,id,username,token):
         auth_flag = False
         try:
             con = self.db.get_connection()
+            # con = self.db
             cur = con.cursor()
             cur.execute("insert into authentication_session() where username = %s and token=%s", (username, token,))
             rows = cur.fetchone()
@@ -23,10 +27,12 @@ class UserSchema:
         finally:
             con.close()
         return auth_flag
+
     def check_authentication(self,username, token):
         auth_flag = False
         try:
             con = self.db.get_connection()
+            # con = self.db
             try:
 
                 cur = con.cursor()
@@ -47,9 +53,11 @@ class UserSchema:
         except Exception as e:
             print(connection_eror,e)
         return auth_flag
+
     def username_exist(self,username):
         try:
             con = self.db.get_connection()
+            # con = self.db
 
             try:
                 cur = con.cursor()
@@ -72,6 +80,7 @@ class UserSchema:
         #TODO rewrite all call and add error processing
         try:
             con = self.db.get_connection()
+            # con = self.db
 
             try:
                 user = CreateUser()
@@ -111,6 +120,7 @@ class UserSchema:
     def registrateUser(self, user):
         try:
             con = self.db.get_connection()
+            # con = self.db
 
             try:
                 cur = con.cursor()
@@ -122,10 +132,12 @@ class UserSchema:
                 con.close()
         except Exception as e:
             print(connection_eror)
+
     def refreshAuthToken(self,username,token):
         commited = False
         try:
             con = self.db.get_connection()
+            # con = self.db
             try:
                 cur = con.cursor()
                 cur.execute("update authentication_session set token= %s, authentication_date=now(),authentication_time=now() where username = %s",(token,username,))
@@ -141,10 +153,12 @@ class UserSchema:
             commited = False
             print("connection error", e)
         return commited
+
     def insertAuthToken(self, username, token, mac_address, oSys, other_info):
         commited = False
         try:
             con = self.db.get_connection()
+            # con = self.db
             try:
                 cur = con.cursor()
                 cur.execute("delete from authentication_session where username = %s",username)
@@ -171,11 +185,13 @@ class UserSchema:
             commited = False
             print("connection error", e)
         return commited
+
     def deleteAuthToken(self,username):
         sql = "delete from authentication_session where username = %s "
         resp = {}
         try:
             con = self.db.get_connection()
+            # con = self.db
 
             try:
                 cur = con.cursor()
@@ -192,8 +208,6 @@ class UserSchema:
             print(connection_eror)
             resp = {'deleted': False, 'errors': [connection_eror,e]}
 
-
-
     def createNewUser(self, user):
 
         sql1 = "insert into user_base values(%s,%s,%s,%s)"
@@ -202,6 +216,7 @@ class UserSchema:
         commited = False
         try:
             con = self.db.get_connection()
+            # con = self.db
 
             try:
                 cur = con.cursor()

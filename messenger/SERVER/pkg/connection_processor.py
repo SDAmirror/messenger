@@ -6,6 +6,7 @@ from DB.models.user_model import CreateUser
 from DB.models.user_model import AuthenticatedUser
 from .email_validation import Validator
 from pkg.message_processor import *
+import hashlib
 import rsa
 
 message_recirver = Message_Recirver()
@@ -13,6 +14,10 @@ message_sender = Message_Sender()
 
 
 def authorisation(username, password):
+    hasspassword = hashlib.new("sha256")
+    hasspassword.update(password.encode())
+
+    password = hasspassword.hexdigest()
     userSchema = UserSchema()
     ress = userSchema.getUserByUsername(username)
     if len(ress['errors']) == 0:
@@ -143,7 +148,7 @@ def user_authorisation(id, message_sender, logger,data):
         authUser = AuthenticatedUser(user.__dict__, usertoken)
         authUser.user.pop('password')
         # try catch
-        eflag = newAuthorisation(username, usertoken, '', '', '')
+        eflag = newAuthorisation(username, usertoken, '', '', '',)
         if not eflag:
             resp = message_sender.send_message(id, json.dumps({'url': 'authorization',"message": "authentication failed: Server error",'statusCode':50505, "auth_success": False}))
         else:
@@ -217,6 +222,10 @@ def  user_registration_part4(id, message_sender, logger,user):
     flag = False
     errors = []
     response_model = ''
+    hasspassword = hashlib.new("sha256")
+    hasspassword.update(user.password.encode())
+
+    user.password = hasspassword.hexdigest()
     ress = userSchema.createNewUser(user)
     if 'username_taken' in ress['errors']:
         response_model = message_sender.send_message(id,json.dumps({'url':'registration',"message": "registration failed: username already taken",'statusCode':50441, "auth_success": False}))
@@ -227,7 +236,7 @@ def  user_registration_part4(id, message_sender, logger,user):
         authUser.user.pop('password')
 
         # try catch
-        flag = newAuthorisation(user.username, usertoken, '', '', '')
+        flag = newAuthorisation(user.username, usertoken, '', '', '',)
         if not flag:
 
             response_model = message_sender.send_message(id,json.dumps({'url':'registration',"message": "successfull registration: Server error",'statusCode':50505, "auth_success": True}))

@@ -6,6 +6,9 @@ import ssl
 import uuid
 import logging
 from concurrent.futures import ProcessPoolExecutor as Pool
+
+import psycopg2
+
 from pkg import message_processor
 from pkg import connection_processor as con_procc
 from collections import deque
@@ -13,9 +16,14 @@ from select import select
 from pkg.MessageCtryptor import RSACryptor
 from logger import Logging
 
-
+try:
+    print(1)
+    # DBPool = psycopg2.connect(database="postgres", user="postgres", password="123456", host="127.0.0.1", port="5432")
+except Exception as e:
+    print("database connection error")
+    raise KeyboardInterrupt
 __basedir__ = os.path.dirname(os.path.realpath(__file__))
-print(os.path.dirname(os.path.realpath(__file__)))
+
 
 loger = 1
 
@@ -181,6 +189,7 @@ def client_handler(client, id):
 
                 except json.JSONDecodeError as e:
                     print(e, 'auth data recieve error')
+                    continue
 
             except ConnectionAbortedError as e:
                 print(f'con error{e}')
@@ -237,19 +246,19 @@ def client_handler(client, id):
                 future = pool.submit(fn, id, message_sender, logger, message)
                 yield 'future', future
                 r1ress = future.result()
-                print(r1ress,220)
+
                 if r1ress['success']:
 
                     user = r1ress['user']
 
                     validation_res = False
-                    code_send_attempts = 3
+                    code_send_attempts = 5
                     while code_send_attempts > 0:
 
 
 
                         r2ress = con_procc.user_registration_part2(id, message_sender, logger, user,context)
-                        print(r2ress,231)
+
                         try:print(user.__dict__)
                         except Exception as e:print(e)
                         if r2ress['success']:
@@ -354,7 +363,7 @@ def client_handler(client, id):
                             yield 'send', client
                             client.send(r4ress['response'])
                     else:
-                        response_model = message_sender.send_message(id,json.dumps({'url':'registration',"message": "registration failed","auth_success": False}))
+                        response_model = message_sender.send_message(id,json.dumps({'url':'registration',"message": "registration failed",'statusCode': 50443,"auth_success": False}))
                         yield 'send', client
                         client.send(response_model)
                 else:

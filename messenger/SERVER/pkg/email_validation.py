@@ -19,7 +19,6 @@ class Validator:
         # sender = "amanbolganovadaria@gmail.com"
 
         message = "\Check:\nSubject: SMTP e-mail \nYOUR CODE is {}".format(str(code))
-        print(message)
         # Create a secure SSL context
         try:
             context = ssl.create_default_context()
