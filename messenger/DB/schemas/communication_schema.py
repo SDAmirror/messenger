@@ -5,11 +5,11 @@ connection_eror = "connection error"
 database_error = "database error"
 
 class CommunicationSchema:
-    def __init__(self):
-        self.db = db2
-        # self.db = db
-        # if db == None:
-        #     self.db = db2.get_connection()
+    def __init__(self, db):
+        # self.db = db2
+        self.db = db
+        if db == None:
+            self.db = db2.get_connection()
 
     def insert_message(self,message,logger):
         # sql1 = "insert into messages values(%s,%s,%s,%s)"
@@ -17,8 +17,8 @@ class CommunicationSchema:
         sql =  "insert into message values(%s,%s,%s,%s,%s,%s,%s)"
         commited = False
         try:
-            con = self.db.get_connection()
-            # con = self.db
+            # con = self.db.get_connection()
+            con = self.db
             try:
                 psycopg2.extras.register_uuid()
                 cur = con.cursor()
@@ -50,8 +50,8 @@ class CommunicationSchema:
 
     def searchFriends(self, username, logger, db=None):
         try:
-            con = self.db.get_connection()
-            # con = self.db
+            # con = self.db.get_connection()
+            con = self.db
             users = []
             try:
                 cur = con.cursor()
@@ -81,8 +81,8 @@ class CommunicationSchema:
         sql = "update message set sent=true where id = %s"
         commited = False
         try:
-            con = self.db.get_connection()
-            # con = self.db
+            # con = self.db.get_connection()
+            con = self.db
             try:
                 psycopg2.extras.register_uuid()
                 cur = con.cursor()
@@ -103,8 +103,8 @@ class CommunicationSchema:
         return {'created': commited, 'errors': []}
     def load_all_messages(self,username, logger, db=None):
         try:
-            con = self.db.get_connection()
-            # con = self.db
+            # con = self.db.get_connection()
+            con = self.db
             messages = []
             try:
                 cur = con.cursor()

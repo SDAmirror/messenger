@@ -16,13 +16,6 @@ from select import select
 from pkg.MessageCtryptor import RSACryptor
 from logger import Logging
 
-try:
-    print(1)
-    # DBPool = psycopg2.connect(database="postgres", user="postgres", password="123456", host="127.0.0.1", port="5432")
-except Exception as e:
-    print("database connection error")
-    raise KeyboardInterrupt
-__basedir__ = os.path.dirname(os.path.realpath(__file__))
 
 
 loger = 1
@@ -92,6 +85,8 @@ def run():
             print('task done')
             continue
 
+def funcRouter():
+    pass
 
 def client_handler(client, id):
     connectionSuccessFlag = False
@@ -508,6 +503,11 @@ def client_handler(client, id):
                         except Exception as e:
                             print('chat message not sent', e)
                     response_model = json.dumps({'url': 'loadchatresponse', 'status':True})
+                elif message['url'] == 'loadfriendsrequest':
+                    pass
+                    # future = pool.submit(con_procc.logout, user.username, logger)
+                    # yield 'future', future
+                    # future.result()
                 elif message['url']=='logout':
                     LOGOUTSIGNAL = True
                     active_users.pop(user.username)
@@ -580,6 +580,7 @@ def base_server(address):
     ssock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     ssock.bind(address)
     ssock.listen(5)
+    print(ssock)
 
     with context.wrap_socket(ssock, server_side=True) as sock:
 
@@ -589,7 +590,7 @@ def base_server(address):
             id = uuid.uuid4()
             # id = uuid.UUID('4913d052-26ab-47d3-b3fe-968be8f52980')
             print(f"[+] {client} connected with id {id}")
-            logger.log(logging.INFO,"[+] {client} connected with id {id}")
+            logger.log(logging.INFO,f"[+] {client} connected with id {id}")
             active_clients[id] = client
             tasks.append(client_handler(client, id))
 
@@ -597,17 +598,35 @@ def base_server(address):
 
 
 # tasks.append(base_server(('192.168.76.217', 4430)))
-# tasks.append(base_server(('172.20.10.8', 4430)))
-tasks.append(base_server(('localhost', 4430)))
+tasks.append(base_server(('172.20.10.8', 4430)))
+# tasks.append(base_server(('localhost', 4430)))
 # tasks.append(base_server(('192.168.1.122', 4430)))
 
 if __name__ == '__main__':
     try:
         print("run")
+        try:
+            print(1)
+            DBPool = psycopg2.connect(database="postgres", user="postgres", password="123456", host="127.0.0.1",
+                                      port="5432")
+            con_procc.DBpool = DBPool
+            message_processor.DBpool = DBPool
+        except Exception as e:
+            print("database connection error")
+            raise KeyboardInterrupt
+
         run()
 
     except KeyboardInterrupt as e:
+        DBPool.close()
+        print("DBPool closed")
+        print("keybord interupted server 1231 ",e)
         pool.shutdown(wait=True,cancel_futures=True)
-        print("keybord interupted",e)
+
     except Exception as e:
         print(e,'run error')
+    finally:
+        try:
+            DBPool.close()
+        except:
+            print(404)

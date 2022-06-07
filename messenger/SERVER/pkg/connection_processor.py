@@ -8,7 +8,7 @@ from .email_validation import Validator
 from pkg.message_processor import *
 import hashlib
 import rsa
-
+DBpool = None
 message_recirver = Message_Recirver()
 message_sender = Message_Sender()
 
@@ -18,7 +18,7 @@ def authorisation(username, password):
     hasspassword.update(password.encode())
 
     password = hasspassword.hexdigest()
-    userSchema = UserSchema()
+    userSchema = UserSchema(DBpool)
     ress = userSchema.getUserByUsername(username)
     if len(ress['errors']) == 0:
         user = ress['user']
@@ -41,7 +41,7 @@ def authorisation(username, password):
 
 
 def authentification_token_validation(token, username):
-    userSchema = UserSchema()
+    userSchema = UserSchema(DBpool)
     try:
         return userSchema.check_authentication(username, token)
     except Exception as e:
@@ -58,7 +58,7 @@ def createAuthToken(username):
 
 
 def refreshAuthToken(username, token):
-    userSchema = UserSchema()
+    userSchema = UserSchema(DBpool)
     try:
         return {'exist':userSchema.refreshAuthToken(username, token),'errors':[]}
     except Exception as e:
@@ -67,7 +67,7 @@ def refreshAuthToken(username, token):
 
 
 def newAuthorisation(username, token, mac_address, oSys, other_info):
-    userSchema = UserSchema()
+    userSchema = UserSchema(DBpool)
     fdeleted = False
     try:
         ress = userSchema.deleteAuthToken(username)
@@ -90,12 +90,12 @@ def email_validation(email):
         return False
 
 def logout(username,logger):
-    userSchema = UserSchema()
+    userSchema = UserSchema(DBpool)
     return userSchema.deleteAuthToken(username)
 
 def user_authentication(id, cryptor, logger,data):
     print(data,'atu',type(data))
-    userSchema = UserSchema()
+    userSchema = UserSchema(DBpool)
     flag = False
     errors = []
     response_model = ''
@@ -133,7 +133,7 @@ def user_authentication(id, cryptor, logger,data):
 def user_authorisation(id, message_sender, logger,data):
 
     user = None
-    userSchema = UserSchema()
+    userSchema = UserSchema(DBpool)
     flag = False
     errors = []
     response_model = ''
@@ -165,7 +165,7 @@ def user_authorisation(id, message_sender, logger,data):
     return {'responce': resp, 'errors': errors, 'flag': flag,'user':user}
 
 def user_registration_part1(id, message_sender, logger,data):
-    userSchema = UserSchema()
+    userSchema = UserSchema(DBpool)
     flag = False
     errors = []
     response_model = ''
@@ -218,7 +218,7 @@ def user_registration_part3(id, message_sender, logger,user, code,message):
     return {'success':True,'validation':validation_res}
 
 def  user_registration_part4(id, message_sender, logger,user):
-    userSchema = UserSchema()
+    userSchema = UserSchema(DBpool)
     flag = False
     errors = []
     response_model = ''

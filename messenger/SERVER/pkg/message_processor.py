@@ -3,8 +3,9 @@ from DB.models.message_model import MessageInfo
 from DB.schemas.message_shema import MessageSchema
 from DB.schemas.communication_schema import CommunicationSchema
 
+DBpool = None
 def addFriendRequest(username,logger):
-    schema = CommunicationSchema()
+    schema = CommunicationSchema(DBpool)
     return schema.searchFriends(username,logger)
 
 def message_rpepare(data,username,loger):
@@ -19,22 +20,22 @@ def message_rpepare(data,username,loger):
     except Exception as e:
         return {'message': None, 'errors': [e]}
 def send_unsent_messages(username,logger):
-    schema = MessageSchema()
+    schema = MessageSchema(DBpool)
     messages = schema.send_unsent_messages(username,logger)
 
     return messages
 def updateSent(id,logger):
-    schema = MessageSchema()
+    schema = MessageSchema(DBpool)
 
     return schema.updateSent(id, logger)
 def sendAllMessages(selfusername,username,logger):
-    schema = MessageSchema()
+    schema = MessageSchema(DBpool)
     messages = schema.load_all_messages(selfusername, username, logger)
     return messages
 
 def message_processor(message,logger):
 
-    schema = MessageSchema()
+    schema = MessageSchema(DBpool)
 
     return schema.insert_message(message,logger)
 

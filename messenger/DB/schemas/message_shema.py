@@ -7,11 +7,11 @@ connection_eror = "connection error"
 database_error = "database error"
 
 class MessageSchema:
-    def __init__(self):
-        self.db = db2
-        # self.db = db
-        # if db == None:
-        #     self.db = db2.get_connection()
+    def __init__(self,db):
+        # self.db = db2
+        self.db = db
+        if db == None:
+            self.db = db2.get_connection()
 
 
     def insert_message(self,message,logger):
@@ -20,7 +20,8 @@ class MessageSchema:
         sql =  "insert into message values(%s,%s,%s,%s,%s,%s,%s)"
         commited = False
         try:
-            con = self.db.get_connection()
+            # con = self.db.get_connection()
+            con = self.db
             try:
                 psycopg2.extras.register_uuid()
                 cur = con.cursor()
@@ -43,7 +44,7 @@ class MessageSchema:
                 commited = False
             finally:
                 cur.close()
-                con.close()
+                
         except Exception as e:
             commited = False
             print("connection error", e)
@@ -52,8 +53,8 @@ class MessageSchema:
 
     def send_unsent_messages(self, username, logger):
         try:
-            con = self.db.get_connection()
-            # con = self.db
+            # con = self.db.get_connection()
+            con = self.db
             messages = []
             try:
                 cur = con.cursor()
@@ -70,7 +71,7 @@ class MessageSchema:
                 return_block = {"messages": None, "errors": [e]}
             finally:
                 cur.close()
-                con.close()
+                
         except Exception as e:
             return_block = {"messages": None, "errors": [e]}
             print("connection error",e)
@@ -82,8 +83,8 @@ class MessageSchema:
         sql = "update message set sent=true where id = %s"
         commited = False
         try:
-            con = self.db.get_connection()
-            # con = self.db
+            # con = self.db.get_connection()
+            con = self.db
             try:
                 psycopg2.extras.register_uuid()
                 cur = con.cursor()
@@ -96,20 +97,21 @@ class MessageSchema:
                 commited = False
             finally:
                 cur.close()
-                con.close()
+                
         except Exception as e:
             commited = False
             print("connection error", e)
             return {'created': commited, 'errors': [e]}
         return {'created': commited, 'errors': []}
+
     def load_all_messages(self,selfusername,username, logger, db=None):
         try:
-            con = self.db.get_connection()
-            # con = self.db
+            # con = self.db.get_connection()
+            con = self.db
             messages = []
             try:
                 cur = con.cursor()
-                sql = "select * from message where ( receiver = %s and sender=%s) or ( receiver = %s and sender=%s) order by send_date,send_time"
+                sql = "select * from message where ( receiver = %s and sender=%s) or ( receiver = %s and sender=%s) order by send_date,send_time DESC LIMIT 15;"
                 cur.execute(sql,(selfusername,username,username,selfusername,))
                 for row in cur.fetchall():
                     message = MessageInfo(str(row[0]),row[1],row[2],row[3],row[4],row[5],row[6])
@@ -122,8 +124,34 @@ class MessageSchema:
                 return_block = {"messages": None, "errors": [e]}
             finally:
                 cur.close()
-                con.close()
+                
         except Exception as e:
             return_block = {"messages": None, "errors": [e]}
             print("connection error",e)
+        return return_block
+
+    def load_all_friends(self, selfusername, username, logger, db=None):
+        try:
+            # con = self.db.get_connection()
+            con = self.db
+            messages = []
+            try:
+                cur = con.cursor()
+                sql = "select * from message where ( receiver = %s and sender=%s) or ( receiver = %s and sender=%s) order by send_date,send_time DESC LIMIT 15;"
+                cur.execute(sql, (selfusername, username, username, selfusername,))
+                for row in cur.fetchall():
+                    message = MessageInfo(str(row[0]), row[1], row[2], row[3], row[4], row[5], row[6])
+                    message.send_time = message.send_time.strftime('%H-%M-%S')
+                    message.send_date = message.send_date.__str__()
+                    messages.append(message)
+                return_block = {"messages": messages, "errors": []}
+            except Exception as e:
+                print(e, 'send_unsent_messages')
+                return_block = {"messages": None, "errors": [e]}
+            finally:
+                cur.close()
+
+        except Exception as e:
+            return_block = {"messages": None, "errors": [e]}
+            print("connection error", e)
         return return_block
