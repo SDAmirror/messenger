@@ -6,9 +6,7 @@ import ssl
 import uuid
 import logging
 from concurrent.futures import ProcessPoolExecutor as Pool
-
 import psycopg2
-
 from pkg import message_processor
 from pkg import connection_processor as con_procc
 from collections import deque
@@ -379,12 +377,7 @@ def client_handler(client, id):
         print('connect flag server ' ,connectionSuccessFlag)
         if not connectionSuccessFlag:
             continue
-            # print('fatal authentication', connectionSuccessFlag)
-            # print(f"client {id} disconnected")
-            # active_clients.pop(id)
-            # client.close()
-            # cryptor.delete_RSA_keys()
-            # return
+
 
         LOGOUTSIGNAL = False
         active_users[user.username] = id
@@ -435,9 +428,7 @@ def client_handler(client, id):
                 except Exception as e:
                     print(e,'message load error')
                     continue
-                    # client.close()
-                    # cryptor.delete_RSA_keys()
-                    # break
+
                 print(message)
                 if 'url' not in message.keys():
                     logger.log(logging.ERROR,"message sent with wrong format")
@@ -598,8 +589,8 @@ def base_server(address):
 
 
 # tasks.append(base_server(('192.168.76.217', 4430)))
-tasks.append(base_server(('172.20.10.8', 4430)))
-# tasks.append(base_server(('localhost', 4430)))
+# tasks.append(base_server(('172.20.10.8', 4430)))
+tasks.append(base_server(('localhost', 4430)))
 # tasks.append(base_server(('192.168.1.122', 4430)))
 
 if __name__ == '__main__':

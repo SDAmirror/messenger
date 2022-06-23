@@ -111,7 +111,7 @@ class MessageSchema:
             messages = []
             try:
                 cur = con.cursor()
-                sql = "select * from message where ( receiver = %s and sender=%s) or ( receiver = %s and sender=%s) order by send_date,send_time DESC LIMIT 15;"
+                sql = "select * from message where ( receiver = %s and sender=%s) or ( receiver = %s and sender=%s) order by send_date,send_time LIMIT 15;"
                 cur.execute(sql,(selfusername,username,username,selfusername,))
                 for row in cur.fetchall():
                     message = MessageInfo(str(row[0]),row[1],row[2],row[3],row[4],row[5],row[6])
